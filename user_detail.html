@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Detail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0f1117;--surface:#171c26;--surface2:#1e2535;--border:#2a3245;
+      --accent:#4f8ef7;--accent2:#38d9a9;--danger:#ff6b6b;--warn:#ffa94d;
+      --text:#e8ecf4;--muted:#7a8aaa;
+      --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+      --r:6px;--t:150ms ease;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+    #app{display:flex;flex-direction:column;min-height:100vh}
+
+    /* HEADER */
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .logo{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:2px;text-transform:uppercase;border:1px solid var(--accent);padding:3px 8px;border-radius:3px}
+    header h1{font-size:14px;font-weight:500}
+    .sp1{flex:1}
+    .env{font-family:var(--mono);font-size:10px;color:var(--warn);border:1px solid var(--warn);padding:2px 7px;border-radius:3px}
+
+    /* CONTENT */
+    .page{max-width:900px;margin:0 auto;padding:28px 24px 48px}
+
+    /* ERROR / LOADING STATES */
+    .errstate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:12px;color:var(--muted)}
+    .errstate .ico{font-size:40px;opacity:.3}
+    .errstate h2{font-size:16px;font-weight:500;color:var(--danger)}
+    .errstate p{font-size:12px;font-family:var(--mono);color:var(--muted);text-align:center;line-height:1.7}
+    .loading{display:flex;align-items:center;justify-content:center;min-height:60vh;gap:10px;color:var(--muted);font-family:var(--mono);font-size:12px}
+
+    /* MULTI-MATCH NOTICE */
+    .notice{background:rgba(255,169,77,.08);border:1px solid rgba(255,169,77,.3);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:12px;color:var(--warn);display:flex;align-items:center;gap:8px}
+    .notice strong{font-weight:600}
+
+    /* AVATAR + HERO CARD */
+    .hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+    .avatar{width:64px;height:64px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:22px;font-weight:600;color:var(--accent);overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .hero-info{flex:1;min-width:200px}
+    .hero-name{font-size:20px;font-weight:600;margin-bottom:4px}
+    .hero-email{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:8px}
+    .hero-chips{display:flex;gap:6px;flex-wrap:wrap}
+    .chip{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:3px;letter-spacing:.4px;white-space:nowrap}
+    .chip-act{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.25)}
+    .chip-ina{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
+    .chip-agent{background:rgba(79,142,247,.12);color:#4f8ef7;border:1px solid rgba(79,142,247,.3)}
+    .chip-req{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
+    .chip-eid{background:rgba(255,169,77,.08);color:var(--warn);border:1px solid rgba(255,169,77,.25)}
+
+    /* INFO GRID */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:5px}
+    .ic-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+    .ic-value{font-family:var(--mono);font-size:12px;word-break:break-word}
+    .ic-value.large{font-size:15px;font-weight:600;color:var(--accent)}
+    .ic-value a{color:var(--accent);text-decoration:none}
+    .ic-value a:hover{text-decoration:underline}
+    .ic-empty{color:var(--muted);font-style:italic;font-size:11px;font-family:var(--sans)}
+
+    /* SECTION HEADER */
+    .sh{display:flex;align-items:center;margin-bottom:12px;gap:10px}
+    .sh h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
+
+    /* DIVIDER */
+    .divider{height:1px;background:var(--border);margin:24px 0}
+
+    /* ACTIONS */
+    .actions{display:flex;gap:8px;align-items:center}
+    .btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--r);border:none;cursor:pointer;transition:opacity var(--t),transform var(--t);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+    .btn:hover{opacity:.82;transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .bs{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+
+    /* SPINNER */
+    .spn{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* PRINT */
+    @media print {
+      body{background:#fff;color:#000}
+      header{background:#fff;border-bottom:1px solid #ccc;position:static}
+      .logo{color:#333;border-color:#333}
+      .env,.actions{display:none!important}
+      .hero,.info-card{background:#fff;border:1px solid #ccc}
+      .ic-label,.muted{color:#555}
+      .ic-value.large{color:#1a4faf}
+      .hero-email{color:#1a4faf}
+      .chip{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+      .notice{background:#fff8e1;border-color:#f0ad4e;color:#7a5c00}
+      .page{padding:16px 0}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span class="logo">VELCO</span>
+    <h1>User Detail</h1>
+    <div class="sp1"></div>
+    <div class="actions" id="hdrActions" style="display:none">
+      <button class="btn bs" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn bs" onclick="window.print()">⎙ Print</button>
+    </div>
+    <span class="env">DEV / BETA</span>
+  </header>
+  <div class="page" id="pageContent">
+    <div class="loading"><span class="spn"></span>&nbsp;Looking up employee…</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════
+const CFG = {
+  domain: 'velco-betabox.freshservice.com',
+  apiKey: 'uloskM4yZXvLPVUdOxyD',
+};
+const BASE = 'https://' + CFG.domain;
+const HDR  = { Authorization: 'Basic ' + btoa(CFG.apiKey + ':X'), 'Content-Type': 'application/json' };
+
+const GET = async p => {
+  const r = await fetch(BASE + p, { headers: HDR });
+  if (!r.ok) throw new Error(`GET ${p} → ${r.status}`);
+  return r.json();
+};
+
+// ═══════════════════════════════════════════
+//  URL PARAM
+// ═══════════════════════════════════════════
+function getEmployeeId() {
+  const p = new URLSearchParams(window.location.search);
+  return (p.get('employee_id') || p.get('employeeId') || p.get('emp_id') || '').trim();
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function showError(title, detail) {
+  document.getElementById('pageContent').innerHTML = `
+    <div class="errstate">
+      <div class="ico">◎</div>
+      <h2>${title}</h2>
+      <p>${detail}</p>
+    </div>`;
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function initials(u) {
+  const f = (u.first_name||'').charAt(0).toUpperCase();
+  const l = (u.last_name||'').charAt(0).toUpperCase();
+  return f + l || '?';
+}
+
+function val(v, mono=true) {
+  if (v == null || v === '') return `<span class="ic-empty">—</span>`;
+  return mono ? esc(v) : `<span style="font-family:var(--sans)">${esc(v)}</span>`;
+}
+
+function infoCard(label, value, opts={}) {
+  const rendered = (value == null || value === '')
+    ? `<span class="ic-empty">not set</span>`
+    : opts.link
+      ? `<a href="${esc(opts.link)}" target="_blank">${esc(value)}</a>`
+      : opts.large
+        ? `<span class="ic-value large">${esc(value)}</span>`
+        : esc(value);
+  return `
+    <div class="info-card">
+      <span class="ic-label">${label}</span>
+      <span class="ic-value">${rendered}</span>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  MAIN
+// ═══════════════════════════════════════════
+async function init() {
+  const empId = getEmployeeId();
+
+  if (!empId) {
+    showError(
+      'No employee_id specified',
+      'Usage: user_detail.html?employee_id=100722'
+    );
+    return;
+  }
+
+  try {
+    const enc = encodeURIComponent(`employee_id:'${empId}'`);
+    const data = await GET(`/api/v2/requesters?query="${enc}"&include_agents=true`);
+    const users = data.requesters || [];
+
+    if (!users.length) {
+      showError(
+        `Employee "${empId}" not found`,
+        `No requester or agent matched employee_id = ${empId}.\nCheck the ID or verify the record exists in Freshservice.`
+      );
+      return;
+    }
+
+    // Store for export
+    window._userData  = users[0];
+    window._allUsers  = users;
+    window._empId     = empId;
+
+    renderPage(users[0], users.length);
+    document.getElementById('hdrActions').style.display = 'flex';
+
+  } catch(e) {
+    showError('Failed to load user', esc(e.message));
+  }
+}
+
+function renderPage(u, totalMatches) {
+  const isActive   = u.active !== false;
+  const isAgent    = !!u.is_agent;
+  const fullName   = [u.first_name, u.last_name].filter(Boolean).join(' ') || '—';
+  const avatarHTML = u.avatar?.thumb_url
+    ? `<img src="${esc(u.avatar.thumb_url)}" alt="${esc(fullName)}"/>`
+    : initials(u);
+
+  const multiNotice = totalMatches > 1
+    ? `<div class="notice">⚠ <span><strong>${totalMatches} records</strong> matched employee_id <code>${esc(window._empId)}</code> — showing the first result.</span></div>`
+    : '';
+
+  // Build chips row
+  const chips = [
+    isActive
+      ? `<span class="chip chip-act">● Active</span>`
+      : `<span class="chip chip-ina">○ Inactive</span>`,
+    isAgent
+      ? `<span class="chip chip-agent">Agent</span>`
+      : `<span class="chip chip-req">Requester</span>`,
+    `<span class="chip chip-eid">EMP: ${esc(u.employee_id || window._empId)}</span>`,
+  ].join('');
+
+  // Phone: prefer mobile, fall back to work
+  const phone = u.mobile_phone_number || u.work_phone_number || '';
+
+  const html = `
+    ${multiNotice}
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="avatar">${avatarHTML}</div>
+      <div class="hero-info">
+        <div class="hero-name">${esc(fullName)}</div>
+        <div class="hero-email">${esc(u.primary_email || '—')}</div>
+        <div class="hero-chips">${chips}</div>
+      </div>
+    </div>
+
+    <!-- IDENTITY -->
+    <div class="sh"><h3>Identity</h3></div>
+    <div class="grid">
+      ${infoCard('Employee ID',   u.employee_id,       {large:true})}
+      ${infoCard('Freshservice ID', u.id,              {})}
+      ${infoCard('First Name',    u.first_name,        {})}
+      ${infoCard('Last Name',     u.last_name,         {})}
+      ${infoCard('Primary Email', u.primary_email,     {link:'mailto:'+u.primary_email})}
+      ${infoCard('Secondary Email', u.secondary_email, u.secondary_email ? {link:'mailto:'+u.secondary_email} : {})}
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ORGANISATION -->
+    <div class="sh"><h3>Organisation</h3></div>
+    <div class="grid">
+      ${infoCard('Job Title',     u.job_title,         {})}
+      ${infoCard('Department',    u.department,        {})}
+      ${infoCard('Location',      u.location,          {})}
+      ${infoCard('Reporting Manager', u.reporting_manager_id ? `ID: ${u.reporting_manager_id}` : '', {})}
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CONTACT -->
+    <div class="sh"><h3>Contact</h3></div>
+    <div class="grid">
+      ${infoCard('Mobile',        u.mobile_phone_number,  u.mobile_phone_number ? {link:'tel:'+u.mobile_phone_number} : {})}
+      ${infoCard('Work Phone',    u.work_phone_number,    u.work_phone_number   ? {link:'tel:'+u.work_phone_number}   : {})}
+      ${infoCard('Address',       u.address,              {})}
+      ${infoCard('Language',      u.language,             {})}
+      ${infoCard('Time Zone',     u.time_zone,            {})}
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SYSTEM -->
+    <div class="sh"><h3>System</h3></div>
+    <div class="grid">
+      ${infoCard('Created',       u.created_at  ? new Date(u.created_at ).toLocaleString() : '', {})}
+      ${infoCard('Last Updated',  u.updated_at  ? new Date(u.updated_at ).toLocaleString() : '', {})}
+      ${infoCard('Last Login',    u.last_login_at ? new Date(u.last_login_at).toLocaleString() : '', {})}
+      ${infoCard('Has Logged In', u.has_logged_in != null ? String(u.has_logged_in) : '', {})}
+    </div>`;
+
+  document.getElementById('pageContent').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+//  CSV EXPORT
+// ═══════════════════════════════════════════
+function exportCSV() {
+  const u   = window._userData || {};
+  const eid = window._empId || '';
+
+  const headers = [
+    'Employee ID','Freshservice ID','First Name','Last Name',
+    'Primary Email','Secondary Email','Job Title','Department',
+    'Location','Mobile','Work Phone','Address',
+    'Active','Is Agent','Language','Time Zone',
+    'Created','Last Updated','Last Login'
+  ];
+
+  const row = [
+    u.employee_id, u.id, u.first_name, u.last_name,
+    u.primary_email, u.secondary_email, u.job_title, u.department,
+    u.location, u.mobile_phone_number, u.work_phone_number, u.address,
+    u.active, u.is_agent, u.language, u.time_zone,
+    u.created_at  ? new Date(u.created_at ).toLocaleString() : '',
+    u.updated_at  ? new Date(u.updated_at ).toLocaleString() : '',
+    u.last_login_at ? new Date(u.last_login_at).toLocaleString() : '',
+  ].map(v => { if(v==null||v==='') return ''; return '"'+String(v).replace(/"/g,'""')+'"'; });
+
+  const content = [headers.join(','), row.join(',')].join('\r\n');
+  const blob = new Blob([content], {type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `user_${eid}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
