@@ -776,12 +776,16 @@ async function cloneEnt(id) {
 }
 
 async function saveEnt() {
+  const isNew = !editEId;
+  
   const jp   =document.getElementById('ef_jp').value.trim();
   const notes=document.getElementById('ef_notes').value.trim();
   const besVal=document.getElementById('ef_bes').value;   // "yes" or "no"
+  
   const tpId =document.getElementById('ef_tp').value;
   const poId =document.getElementById('ef_poi').value;
   const aoId =document.getElementById('ef_aoi').value;
+  
   if(!jp)    { toast('Job Profile ID is required','e'); return; }
   if(!notes) { toast('Entitlement Justification is required','e'); return; }
   if(!besVal){ toast('BES Entitlement is required','e'); return; }
@@ -797,13 +801,13 @@ async function saveEnt() {
   const payload={ data:{
     workday_job_profile_id: jp,
     notes,
-    entitlement_type:    { id: parseInt(tpId) },
-    entitlement_is_bes:  { id: ynId(besVal) },
-    provisioning_owner:  { id: parseInt(poId) },
-    approval_owner:      { id: parseInt(aoId) },
-    ...(itemId ? { entitlement_item: { id: parseInt(itemId) } } : {}),
-    ...(paId   ? { physical_access:  { id: parseInt(paId)   } } : {}),
-    ...(locId  ? { location:         { id: parseInt(locId)  } } : {}),
+    entitlement_type:   isNew ? parseInt(tpId)  : { id: parseInt(tpId) },
+    entitlement_is_bes: isNew ? ynId(besVal)    : { id: ynId(besVal) },
+    provisioning_owner: isNew ? parseInt(poId)  : { id: parseInt(poId) },
+    approval_owner:     isNew ? parseInt(aoId)  : { id: parseInt(aoId) },
+  ...(itemId ? { entitlement_item: isNew ? parseInt(itemId) : { id: parseInt(itemId) } } : {}),
+  ...(paId   ? { physical_access:  isNew ? parseInt(paId)  : { id: parseInt(paId)  } } : {}),
+  ...(locId  ? { location:         isNew ? parseInt(locId) : { id: parseInt(locId) } } : {}),
   }};
 
   console.log('[saveEnt] payload:', JSON.stringify(payload));
