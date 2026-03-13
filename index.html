@@ -509,7 +509,6 @@ function ynId(val) {
   if (v === 'no'  || v === '2') return CFG.noId;
   return CFG.noId; // safe default
 }
-
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
@@ -629,12 +628,10 @@ async function saveMaster() {
   const lc    = document.getElementById('mf_lc').value;
   if(!rid){ toast('Role ID is required','e'); return; }
   if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
-
-
-
+  
+  const isNew = !editMId;
   const payload={ data:{
-    const isNew = !editMId;
-    role_id: rid,
+    role_id:          rid,
     is_active: isNew ? ynId(actVal)       : { id: ynId(actVal) },
     is_bes:    isNew ? ynId(besVal)       : { id: ynId(besVal) },
     role_last_changed: lc ? new Date(lc).toISOString() : new Date().toISOString()
