@@ -422,6 +422,11 @@
 // ═══════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════
+// ⚠️ FRESHSERVICE LOOKUP FIELD QUIRK:
+// POST (create) → bare integer:  is_active: 1
+// PUT  (update) → id object:     is_active: { id: 1 }
+// Applies to ALL lookup fields: is_active, is_bes, entitlement_type,
+// entitlement_is_bes, physical_access, provisioning_owner, approval_owner, etc.
 const CFG = {
   domain:    'velco-betabox.freshservice.com',
   apiKey:    'uloskM4yZXvLPVUdOxyD',   // 🔑 replace before production
