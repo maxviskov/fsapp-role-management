@@ -624,7 +624,10 @@ async function loadMasters() {
   el.innerHTML='<div class="empty"><p style="font-size:11px;font-family:var(--mono)">Loading…</p></div>';
   try {
     const d=await GET(`/api/v2/objects/${CFG.masterObj}/records?page_size=100`);
-    allRoles=d.records||[]; filtRoles=[...allRoles]; renderList();
+    allRoles=d.records||[]; 
+    allRoles.sort((a, b) => (a.data?.role_id || '').localeCompare(b.data?.role_id || '', undefined, { numeric: true }));
+    filtRoles=[...allRoles]; 
+    renderList();
   } catch(e){ el.innerHTML=`<div class="empty"><p style="color:#ff6b6b;font-size:11px;font-family:var(--mono)">${e.message}</p></div>`; toast(e.message,'e'); }
 }
 
@@ -642,7 +645,13 @@ function renderList() {
   }).join('');
 }
 
-function filterRoles(q){ const lq=q.toLowerCase(); filtRoles=allRoles.filter(r=>(r.data?.role_id||'').toLowerCase().includes(lq)); renderList(); }
+function filterRoles(q){ 
+  const lq=q.toLowerCase(); 
+  filtRoles=allRoles
+    .filter(r=>(r.data?.role_id||'').toLowerCase().includes(lq)) 
+    .sort((a, b) => (a.data?.role_id || '').localeCompare(b.data?.role_id || '', undefined, { numeric: true }));
+  renderList(); 
+}
 
 async function selectRole(id) {
   selRole=allRoles.find(r=>String(r.data.bo_display_id)===String(id));
@@ -886,7 +895,7 @@ async function saveEnt() {
   ...(itemId ? { entitlement_item: isNew ? parseInt(itemId) : { id: parseInt(itemId) } } : {}),
   // physical_access and location applied below via optionalLookup
   }};
-  
+
   applyOptional(payload.data, 'physical_access', optionalLookup(paId,  isNew));
   applyOptional(payload.data, 'location',        optionalLookup(locId, isNew));
   console.log('[saveEnt] nullStrategy=' + getNullStrategy() + ' paId=' + paId + ' locId=' + locId);
