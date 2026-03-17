@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Role Master Manager</title>
+  <title>Role Detail</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -14,82 +14,43 @@
       --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
       --r:6px;--t:150ms ease;
     }
-
     [data-theme="light"] {
   --bg:#f0f2f7;--surface:#ffffff;--surface2:#e8ebf2;--border:#d0d6e8;
   --text:#1a2035;--muted:#6272a4;--accent:#2563eb;--accent2:#059669;
   --danger:#dc2626;--warn:#d97706;
 }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;height:100vh;overflow:hidden}
-    #app{display:flex;flex-direction:column;height:100vh}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+    #app{display:flex;flex-direction:column;min-height:100vh}
 
     /* HEADER */
-    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:100}
     .logo{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:2px;text-transform:uppercase;border:1px solid var(--accent);padding:3px 8px;border-radius:3px}
     header h1{font-size:14px;font-weight:500}
     .sp1{flex:1}
     .env{font-family:var(--mono);font-size:10px;color:var(--warn);border:1px solid var(--warn);padding:2px 7px;border-radius:3px}
-    #hst{font-family:var(--mono);font-size:11px;color:var(--muted)}
 
-    /* LAYOUT */
-    .body{display:flex;flex:1;overflow:hidden}
+    /* CONTENT */
+    .page{max-width:1100px;margin:0 auto;padding:28px 24px 48px}
 
-    /* LEFT */
-    .left{width:272px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
-    .ph{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-    .ph h2{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
-    .sb{padding:9px 12px;border-bottom:1px solid var(--border)}
-    .sb input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color var(--t)}
-    .sb input::placeholder{color:var(--muted)}
-    .sb input:focus{border-color:var(--accent)}
-    #rlist{flex:1;overflow-y:auto;padding:5px 0}
-    #rlist::-webkit-scrollbar{width:4px}
-    #rlist::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-    .ri{padding:9px 14px;cursor:pointer;border-left:3px solid transparent;transition:background var(--t),border-color var(--t);display:flex;align-items:center;gap:8px}
-    .ri:hover{background:var(--surface2)}
-    .ri.sel{background:rgba(79,142,247,0.1);border-left-color:var(--accent)}
-    .rid{font-family:var(--mono);font-size:12px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-    .dy{background:var(--accent2)} .dn{background:var(--muted)}
-    /* Role status dot colours */
-    .ds-new{background:var(--accent)}          /* blue  */
-    .ds-review{background:var(--warn)}         /* orange */
-    .ds-active{background:var(--accent2)}      /* green */
-    .ds-inactive{background:var(--muted)}      /* grey  */
-    .pf{padding:9px 12px;border-top:1px solid var(--border)}
+    /* ERROR STATE */
+    .errstate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:12px;color:var(--muted)}
+    .errstate .ico{font-size:40px;opacity:.3}
+    .errstate h2{font-size:16px;font-weight:500;color:var(--danger)}
+    .errstate p{font-size:12px;font-family:var(--mono);color:var(--muted)}
 
-    /* RIGHT */
-    .right{flex:1;display:flex;flex-direction:column;overflow:hidden}
-    .dh{padding:13px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);flex-shrink:0}
-    .drt{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent)}
-    .dnm{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--muted)}
-    .drm{font-size:11px;color:var(--muted);margin-top:2px}
-    .db{flex:1;overflow-y:auto;padding:18px 20px}
-    .db::-webkit-scrollbar{width:4px}
-    .db::-webkit-scrollbar-thumb{background:var(--border)}
+    /* LOADING STATE */
+    .loading{display:flex;align-items:center;justify-content:center;min-height:60vh;gap:10px;color:var(--muted);font-family:var(--mono);font-size:12px}
 
-    /* MASTER CARD */
-    .mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
-    .fg{display:flex;flex-direction:column;gap:3px}
+    /* ROLE HEADER CARD */
+    .role-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:24px;display:flex;align-items:flex-start;gap:32px;flex-wrap:wrap}
+    .role-title{display:flex;flex-direction:column;gap:4px}
+    .role-id{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--accent)}
+    .role-sub{font-size:11px;color:var(--muted)}
+    .role-fields{display:flex;gap:28px;flex-wrap:wrap;margin-top:2px}
+    .fg{display:flex;flex-direction:column;gap:4px}
     .fl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
     .fv{font-family:var(--mono);font-size:13px}
-
-    /* SECTION HEADER */
-    .sh{display:flex;align-items:center;margin-bottom:11px;gap:10px}
-    .sh h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
-    .cb{background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);padding:2px 7px;border-radius:10px}
-
-    /* TABLE */
-    .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    thead th{background:var(--surface2);padding:8px 11px;text-align:left;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);white-space:nowrap}
-    tbody tr{border-bottom:1px solid var(--border);transition:background var(--t)}
-    tbody tr:last-child{border-bottom:none}
-    tbody tr:hover{background:rgba(255,255,255,.025)}
-    td{padding:8px 11px;vertical-align:middle}
-    td.mono{font-family:var(--mono);font-size:11px}
-    .trunc{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
     /* BADGES */
     .badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.4px;white-space:nowrap;display:inline-block}
@@ -103,841 +64,325 @@
     .b-st-active{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
     .b-st-inactive{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
 
-    /* ROW ACTIONS */
-    .ra{display:flex;gap:3px;opacity:0;transition:opacity var(--t)}
-    tbody tr:hover .ra{opacity:1}
+    /* SECTION */
+    .sh{display:flex;align-items:center;margin-bottom:12px;gap:10px}
+    .sh h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
+    .cb{background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);padding:2px 7px;border-radius:10px}
 
-    /* EMPTY / LOADING */
-    .empty{padding:56px 20px;text-align:center;color:var(--muted)}
-    .empty .ico{font-size:30px;margin-bottom:10px;opacity:.35}
+    /* TABLE */
+    .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:28px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    thead th{background:var(--surface2);padding:9px 12px;text-align:left;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);white-space:nowrap}
+    tbody tr{border-bottom:1px solid var(--border);transition:background var(--t)}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:rgba(255,255,255,.025)}
+    td{padding:9px 12px;vertical-align:middle}
+    td.mono{font-family:var(--mono);font-size:11px}
+    .trunc{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .lrow td{text-align:center;padding:28px;color:var(--muted);font-family:var(--mono);font-size:11px}
 
-    /* BUTTONS */
+    /* NOTES CELL */
+    .notes-cell{max-width:200px;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help}
+
+    /* PRINT / EXPORT */
+    .actions{display:flex;gap:8px;align-items:center}
     .btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--r);border:none;cursor:pointer;transition:opacity var(--t),transform var(--t);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-    .btn:hover:not(:disabled){opacity:.82;transform:translateY(-1px)}
+    .btn:hover{opacity:.82;transform:translateY(-1px)}
     .btn:active{transform:translateY(0)}
-    .btn:disabled{opacity:.4;cursor:not-allowed}
-    .bp{background:var(--accent);color:#fff}
     .bs{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-    .bd{background:rgba(255,107,107,.15);color:#ff6b6b;border:1px solid rgba(255,107,107,.3)}
-    .bg{background:transparent;color:var(--muted);border:1px solid transparent;padding:4px 7px;font-size:11px}
-    .bg:hover{color:var(--text);border-color:var(--border);opacity:1!important;transform:none!important}
-    .bsm{padding:4px 9px;font-size:11px}
-
-    /* MODAL */
-    .ov{position:fixed;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);animation:fi 120ms ease}
-    @keyframes fi{from{opacity:0}to{opacity:1}}
-    .mo{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:560px;max-height:88vh;display:flex;flex-direction:column;animation:su 150ms ease}
-    .mow{width:660px}
-    @keyframes su{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .moh{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
-    .moh h3{font-size:14px;font-weight:600;flex:1}
-    .msub{font-family:var(--mono);font-size:11px;color:var(--accent)}
-    .mob{padding:18px 20px;overflow-y:auto;flex:1}
-    .mob::-webkit-scrollbar{width:4px}
-    .mob::-webkit-scrollbar-thumb{background:var(--border)}
-    .mof{padding:13px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
-
-    /* FORM */
-    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-    .s2{grid-column:span 2}
-    .ff{display:flex;flex-direction:column;gap:5px}
-    .ff label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
-    .ff label .req{color:var(--danger);margin-left:2px}
-    .ff input,.ff select,.ff textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color var(--t);width:100%}
-    .ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--accent)}
-    .ff input[readonly]{opacity:.55;cursor:not-allowed}
-    .ff textarea{resize:vertical;min-height:68px;font-family:var(--sans);font-size:12px}
-    .ff select option{background:var(--surface2)}
-    .hint{font-size:10px;color:var(--muted);margin-top:2px}
-
-    /* USER AUTOCOMPLETE */
-    .uw{position:relative}
-    .udd{position:absolute;top:100%;left:0;right:0;z-index:200;background:var(--surface2);border:1px solid var(--accent);border-top:none;border-radius:0 0 var(--r) var(--r);max-height:180px;overflow-y:auto}
-    .udi{padding:7px 10px;cursor:pointer;font-size:12px;transition:background var(--t)}
-    .udi:hover{background:rgba(79,142,247,.15)}
-    .ue{font-size:10px;color:var(--muted);font-family:var(--mono)}
-
-    /* TOAST */
-    #tc{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:2000}
-    .toast{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;font-size:12px;display:flex;align-items:center;gap:8px;min-width:250px;animation:sir 180ms ease}
-    @keyframes sir{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
-    .t-s{border-left:3px solid var(--accent2)}
-    .t-e{border-left:3px solid #ff6b6b}
-    .t-i{border-left:3px solid var(--accent)}
-
-    /* CONFIRM */
-    .moc{width:420px}
-    .cbody{color:var(--muted);font-size:13px;line-height:1.6}
 
     /* SPINNER */
-    .spn{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+    .spn{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* YES/NO DEBUG INDICATOR */
-    .yn-status{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;margin-left:6px}
-    .yn-ok{color:var(--accent2);border:1px solid rgba(56,217,169,.3)}
-    .yn-err{color:var(--danger);border:1px solid rgba(255,107,107,.3)}
+    /* PRINT STYLES */
+    @media print {
+      body{background:#fff;color:#000}
+      header{background:#fff;border-bottom:1px solid #ccc;position:static}
+      .logo{color:#333;border-color:#333}
+      .env,.actions{display:none}
+      .role-header,.tw{border:1px solid #ccc;background:#fff}
+      .fl,.muted{color:#666}
+      .role-id{color:#1a4faf}
+      thead th{background:#f0f0f0;color:#444}
+      tbody tr:hover{background:transparent}
+      .badge{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+      .page{padding:16px 0}
+    }
   </style>
 </head>
 <body>
 <div id="app">
   <header>
     <span class="logo">VELCO</span>
-    <h1>Role Master Manager</h1>
+    <h1>Role Detail</h1>
     <div class="sp1"></div>
-    <span id="hst"></span>
-    <span id="yn-indicator"></span>
+    <div class="actions" id="hdrActions" style="display:none">
+      <button class="btn bs" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn bs" onclick="window.print()">⎙ Print</button>
+    </div>
     <button class="btn bs" id="themeBtn" onclick="toggleTheme()" style="padding:5px 9px;font-size:13px">☀</button>
     <span class="env">DEV / BETA</span>
   </header>
-  <div class="body">
-
-    <!-- LEFT PANEL -->
-    <div class="left">
-      <div class="ph">
-        <h2>Role Master</h2>
-        <button class="btn bp bsm" onclick="openNewMaster()">+ New</button>
-      </div>
-      <div class="sb"><input id="srch" type="text" placeholder="Search Role ID…" oninput="filterRoles(this.value)"/></div>
-      <div id="rlist"><div class="empty"><p style="font-size:11px;font-family:var(--mono)">Loading…</p></div></div>
-      <div class="pf"><button class="btn bs" style="width:100%;font-size:11px" onclick="loadMasters()">↻ Refresh</button></div>
-    </div>
-
-    <!-- RIGHT PANEL -->
-    <div class="right">
-      <div id="nosel" class="empty" style="margin:auto">
-        <div class="ico">⬡</div>
-        <p>Select a role from the list</p>
-        <p style="margin-top:5px;font-size:11px;font-family:var(--mono);color:var(--muted)">or create a new one</p>
-      </div>
-      <div id="detail" style="display:none;flex:1;flex-direction:column;overflow:hidden">
-        <div class="dh">
-          <div>
-            <div class="drt" id="dtitle">—</div>
-            <div class="dnm" id="dname">—</div>
-            <div class="drm" id="dmeta">—</div>
-          </div>
-          <div class="sp1"></div>
-          <button class="btn bs bsm" onclick="cloneRole()">⧉ Clone</button>
-          <button class="btn bs bsm" onclick="openEditMaster()">✎ Edit</button>
-          <button class="btn bd bsm" onclick="confirmDelMaster()">✕ Delete</button>
-        </div>
-        <div class="db">
-          <div class="mc" id="mcard"></div>
-          <div class="sh">
-            <h3>Entitlements</h3>
-            <span class="cb" id="ecnt">—</span>
-            <button class="btn bp bsm" onclick="openNewEnt()">+ Add Entitlement</button>
-          </div>
-          <div class="tw">
-            <table>
-              <thead><tr>
-                <th>Job Profile ID</th><th>Type</th><th>Item</th>
-                <th>Physical Access</th><th>Location</th><th>BES</th>
-                <th>Prov. Owner</th><th>Appr. Owner</th><th></th>
-              </tr></thead>
-              <tbody id="etb"><tr class="lrow"><td colspan="9">Select a role to load entitlements</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div id="tc"></div>
-
-<!-- MODAL: Role Master -->
-<div id="modM" class="ov" style="display:none">
-  <div class="mo">
-    <div class="moh"><h3 id="modMT">New Role</h3><span class="msub" id="modMS"></span><button class="btn bg" onclick="closeM('modM')" style="padding:4px 8px">✕</button></div>
-    <div class="mob">
-      <div class="fg2">
-        <div class="ff s2">
-          <label>Role ID <span class="req">*</span></label>
-          <input type="text" id="mf_rid" placeholder="e.g. 100102"/>
-        </div>
-        <div class="ff s2">
-          <label>Role Name <span class="req">*</span></label>
-          <input type="text" id="mf_rname" placeholder="e.g. System Administrator"/>
-        </div>
-        <div class="ff">
-          <label>BES <span class="req">*</span></label>
-          <select id="mf_bes">
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="ff">
-          <label>Last Changed <span class="req">*</span></label>
-          <input type="datetime-local" id="mf_lc"/>
-        </div>
-      </div>
-    </div>
-    <div class="mof">
-      <button class="btn bs" onclick="closeM('modM')">Cancel</button>
-      <button class="btn bp" id="btnMS" onclick="saveMaster()">Save Role</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Entitlement -->
-<div id="modE" class="ov" style="display:none">
-  <div class="mo mow">
-    <div class="moh"><h3 id="modET">New Entitlement</h3><span class="msub" id="modES"></span><button class="btn bg" onclick="closeM('modE')" style="padding:4px 8px">✕</button></div>
-    <div class="mob">
-      <div class="fg2">
-        <div class="ff">
-          <label>Workday Job Profile ID <span class="req">*</span></label>
-          <input type="text" id="ef_jp" readonly/>
-        </div>
-        <div class="ff">
-          <label>Entitlement Type <span class="req">*</span></label>
-          <select id="ef_tp">
-            <option value="">— select —</option>
-            <option value="1">Application</option>
-            <option value="2">Physical Access</option>
-            <option value="3">Equipment</option>
-            <option value="4">Software</option>
-            <option value="5">Security Group</option>
-            <option value="6">Shared Account</option>
-          </select>
-        </div>
-        <div class="ff">
-          <label>BES Entitlement <span class="req">*</span></label>
-          <select id="ef_bes">
-            <option value="">— select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="ff">
-          <label>Entitlement Item</label>
-          <select id="ef_item"><option value="">— none —</option></select>
-          <span class="hint">From service catalog</span>
-        </div>
-        <div class="ff">
-          <label>Physical Access</label>
-          <select id="ef_pa">
-            <option value="">— none —</option>
-            <option value="1">NHOF - Basement Storage Ent</option>
-            <option value="2">NHOF - BCC Secure Suite</option>
-            <option value="3">NHOF - Data Center</option>
-            <option value="4">NHOF - Electrical Rm</option>
-            <option value="5">NHOF - Elevator Machine Rm</option>
-            <option value="6">NHOF - EMS Cage</option>
-            <option value="7">NHOF - General</option>
-            <option value="8">NHOF - Generator Bldg</option>
-            <option value="9">NHOF - Mechanical Rm</option>
-            <option value="10">NHOF - Security Office</option>
-            <option value="11">Only Part of Master Access*</option>
-            <option value="12">Pinn - Bld 100 Electrical Rm</option>
-            <option value="13">Pinn - Bld 100 EMS/OPS Office</option>
-            <option value="14">Pinn - Bld 100 Security Office</option>
-            <option value="15">Pinn - Bld 100 Telecom Office</option>
-            <option value="16">Pinn - Bld 200 Network Closet</option>
-            <option value="17">Pinn - Bldg 100 - North ODR Ent.</option>
-            <option value="18">Pinn - Bldg 100 IT Office</option>
-            <option value="19">Pinn - Bldg 100 Mezzanine Ent</option>
-            <option value="20">Pinn - Bldg 300 Net Closet</option>
-            <option value="21">Pinn - DC East Corridor</option>
-            <option value="22">Pinn - DC General access</option>
-            <option value="23">Pinn - DC Generator Bldg</option>
-            <option value="24">Pinn - EMS Cage</option>
-            <option value="25">Pinn - MSF - Record Retention</option>
-            <option value="26">Pinn - UPS-C Bldg</option>
-            <option value="27">Pinn - Whse Mechanical Rm</option>
-            <option value="28">Pinn - Whse Secure Storage</option>
-            <option value="29">Pinn - Whse Secure Storage Key Cab</option>
-            <option value="30">Pinn - Whse Telecom Lab N. Ent</option>
-            <option value="31">Pinn Bldg-100 Training Rm Hall Ent</option>
-            <option value="32">Pinnacle General</option>
-            <option value="33">Pinnacle MCC</option>
-            <option value="34">Redmond Rd Warehouse</option>
-            <option value="35">Sub - Low &amp; Non Qualifying</option>
-            <option value="36">Sub - Medium</option>
-            <option value="37">Sub - Medium with ERC</option>
-            <option value="38">Wenlock</option>
-            <option value="39">NHOF - Backup Control Center</option>
-          </select>
-        </div>
-        <div class="ff">
-          <label>Location</label>
-          <select id="ef_loc">
-            <option value="">— none —</option>
-            <optgroup label="Vermont (primary)">
-              <option value="37000240717">New Haven Operating Facility</option>
-              <option value="37000240719">— NHOF Datacenter</option>
-              <option value="37000240715">Pinnacle Ridge</option>
-              <option value="37000240718">— Building 100</option>
-              <option value="37000240716">— Pinnacle Datacenter</option>
-              <option value="37000378754">Rutland</option>
-            </optgroup>
-            <optgroup label="Americas">
-              <option value="37000240701">America</option>
-              <option value="37000240706">— US</option>
-              <option value="37000240714">—— Vermont</option>
-              <option value="37000240705">— Canada</option>
-            </optgroup>
-            <optgroup label="Other regions">
-              <option value="37000240703">Asia</option>
-              <option value="37000240712">— China</option>
-              <option value="37000240711">— India</option>
-              <option value="37000240713">— Japan</option>
-              <option value="37000240704">Australia</option>
-              <option value="37000240702">Europe</option>
-              <option value="37000240707">— France</option>
-              <option value="37000240709">— Germany</option>
-              <option value="37000240710">— Italy</option>
-              <option value="37000240708">— United Kingdom</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="ff">
-          <label>Provisioning Owner <span class="req">*</span></label>
-          <div class="uw">
-            <input type="text" id="ef_pot" placeholder="Type name or email…" oninput="filterU('ef_pot','ef_poi','ef_pod')" autocomplete="off"/>
-            <div id="ef_pod" class="udd" style="display:none"></div>
-          </div>
-          <input type="hidden" id="ef_poi"/>
-        </div>
-        <div class="ff">
-          <label>Approval Owner <span class="req">*</span></label>
-          <div class="uw">
-            <input type="text" id="ef_aot" placeholder="Type name or email…" oninput="filterU('ef_aot','ef_aoi','ef_aod')" autocomplete="off"/>
-            <div id="ef_aod" class="udd" style="display:none"></div>
-          </div>
-          <input type="hidden" id="ef_aoi"/>
-        </div>
-        <div class="ff s2">
-          <label>Entitlement Justification <span class="req">*</span></label>
-          <textarea id="ef_notes" placeholder="Reason this entitlement is required…"></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="mof">
-      <button class="btn bs" onclick="closeM('modE')">Cancel</button>
-      <button class="btn bp" id="btnES" onclick="saveEnt()">Save Entitlement</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Confirm -->
-<div id="modC" class="ov" style="display:none">
-  <div class="mo moc">
-    <div class="moh"><h3 id="cfT">Confirm</h3><button class="btn bg" onclick="closeM('modC')" style="padding:4px 8px">✕</button></div>
-    <div class="mob"><p class="cbody" id="cfMsg"></p></div>
-    <div class="mof">
-      <button class="btn bs" onclick="closeM('modC')">Cancel</button>
-      <button class="btn bd" id="cfOk">Confirm</button>
-    </div>
+  <div class="page" id="pageContent">
+    <div class="loading"><span class="spn"></span>&nbsp;Loading role…</div>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════
-//  CONFIG
+//  CONFIG — keep in sync with role_master_manager
 // ═══════════════════════════════════════════
-// ⚠️ FRESHSERVICE LOOKUP FIELD QUIRK:
-// POST (create) → bare integer:  is_active: 1
-// PUT  (update) → id object:     is_active: { id: 1 }
-// Applies to ALL lookup fields: is_active, is_bes, entitlement_type,
-// entitlement_is_bes, physical_access, provisioning_owner, approval_owner, etc.
 const CFG = {
   domain:    'velco-betabox.freshservice.com',
-  apiKey:    'uloskM4yZXvLPVUdOxyD',   // 🔑 replace before production
+  apiKey:    'uloskM4yZXvLPVUdOxyD',
   masterObj: 37000019240,
   entObj:    37000019214,
   yesNoObj:  37000019262,
   statusObj: 37000019266,              // Role_Status lookup object
-  // Resolved at runtime by loadYesNo():
-  yesId: null,   // internal record ID for "Yes"
-  noId:  null,   // internal record ID for "No"
+  yesId: null,
+  noId:  null,
 };
 // Role_Status record IDs (hardcoded — confirmed from object 37000019266)
 const ROLE_STATUS = {
-  1: { label: 'New',      cls: 'b-st-new',      dot: 'ds-new'      },
-  2: { label: 'In Review',cls: 'b-st-review',   dot: 'ds-review'   },
-  3: { label: 'Active',   cls: 'b-st-active',   dot: 'ds-active'   },
-  4: { label: 'Inactive', cls: 'b-st-inactive', dot: 'ds-inactive' },
+  1: { label: 'New',       cls: 'b-st-new'      },
+  2: { label: 'In Review', cls: 'b-st-review'   },
+  3: { label: 'Active',    cls: 'b-st-active'   },
+  4: { label: 'Inactive',  cls: 'b-st-inactive' },
 };
-const STATUS_NEW_ID = 1; // default for new roles
+
+function resolveStatus(statusField) {
+  if (!statusField) return ROLE_STATUS[1];
+  const id = statusField.id ?? statusField;
+  return ROLE_STATUS[id] || ROLE_STATUS[1];
+}
 const BASE = 'https://' + CFG.domain;
 const HDR  = { Authorization: 'Basic ' + btoa(CFG.apiKey + ':X'), 'Content-Type': 'application/json' };
 
-// ═══════════════════════════════════════════
-//  HARDCODED LOOKUP MAPS
-// ═══════════════════════════════════════════
-const ENT_TYPE = {
-  1:'Application', 2:'Physical Access', 3:'Equipment',
-  4:'Software',    5:'Security Group',  6:'Shared Account'
+const GET = async p => {
+  const r = await fetch(BASE + p, { headers: HDR });
+  if (!r.ok) throw new Error(`GET ${p} → ${r.status}`);
+  return r.json();
 };
 
-const LOC = {
-  37000240701:'America',                37000240705:'Canada',
-  37000240706:'US',                     37000240714:'Vermont',
-  37000240717:'New Haven Operating Facility', 37000240719:'NHOF Datacenter',
-  37000240715:'Pinnacle Ridge',         37000240718:'Building 100',
-  37000240716:'Pinnacle Datacenter',    37000378754:'Rutland',
-  37000240703:'Asia',                   37000240712:'China',
-  37000240711:'India',                  37000240713:'Japan',
-  37000240704:'Australia',              37000240702:'Europe',
-  37000240707:'France',                 37000240709:'Germany',
-  37000240710:'Italy',                  37000240708:'United Kingdom'
-};
-
-function lk(map, id) { return id != null ? (map[id] || map[String(id)] || `#${id}`) : '—'; }
-
-// Resolve role_status from API data — handles both {id,value} and bare integer
-function resolveStatus(statusField) {
-  if (!statusField) return ROLE_STATUS[STATUS_NEW_ID];
-  const id = statusField.id ?? statusField;
-  return ROLE_STATUS[id] || ROLE_STATUS[STATUS_NEW_ID];
+// ═══════════════════════════════════════════
+//  PARSE URL PARAM
+// ═══════════════════════════════════════════
+function getRoleIdParam() {
+  const params = new URLSearchParams(window.location.search);
+  return (params.get('role_id') || params.get('roleId') || params.get('role') || '').trim();
 }
 
 // ═══════════════════════════════════════════
-//  STATE
+//  RENDER HELPERS
 // ═══════════════════════════════════════════
-let allRoles=[], filtRoles=[], selRole=null;
-let editMId=null, editEId=null, allUsers=[];
+function showError(title, detail) {
+  document.getElementById('pageContent').innerHTML = `
+    <div class="errstate">
+      <div class="ico">⬡</div>
+      <h2>${title}</h2>
+      <p>${detail}</p>
+    </div>`;
+}
+
+function badge(val) {
+  if (!val) return '<span style="color:var(--muted)">—</span>';
+  const v = val.toLowerCase();
+  const cls = (v === 'yes') ? 'b-yes' : 'b-no';
+  return `<span class="badge ${cls}">${val}</span>`;
+}
+
+function activeBadge(val) {
+  if (!val) return '<span style="color:var(--muted)">—</span>';
+  const v = val.toLowerCase();
+  const cls = (v === 'yes') ? 'b-act' : 'b-ina';
+  return `<span class="badge ${cls}">${val}</span>`;
+}
+
+function statusBadge(statusField) {
+  const st = resolveStatus(statusField);
+  return `<span class="badge ${st.cls}">${st.label}</span>`;
+}
+
+function cell(v) { return v || '<span style="color:var(--muted)">—</span>'; }
+
+function shortName(v) {
+  if (!v) return '—';
+  const m = v.match(/^(.+?)\s*</);
+  return m ? m[1] : v;
+}
 
 // ═══════════════════════════════════════════
-//  API HELPERS
+//  MAIN
 // ═══════════════════════════════════════════
-const GET  = async p => { const r=await fetch(BASE+p,{headers:HDR}); if(!r.ok) throw new Error(`GET ${p} → ${r.status}`); return r.json(); };
-const POST = async (p,b) => { const r=await fetch(BASE+p,{method:'POST',headers:HDR,body:JSON.stringify(b)}); if(!r.ok){const t=await r.text();throw new Error(`POST ${p} → ${r.status}: ${t}`);} return r.json(); };
-const PUT  = async (p,b) => { const r=await fetch(BASE+p,{method:'PUT', headers:HDR,body:JSON.stringify(b)}); if(!r.ok){const t=await r.text();throw new Error(`PUT ${p} → ${r.status}: ${t}`);} return r.json(); };
-const DEL  = async p => { const r=await fetch(BASE+p,{method:'DELETE',headers:HDR}); if(!r.ok) throw new Error(`DELETE ${p} → ${r.status}`); };
+async function init() {
+  const roleId = getRoleIdParam();
 
-// ═══════════════════════════════════════════
-//  YES/NO LOOKUP — load real IDs at boot
-// ═══════════════════════════════════════════
-async function loadYesNo() {
-  const d = await GET(`/api/v2/objects/${CFG.yesNoObj}/records?page_size=10`);
-  const recs = d.records || [];
-  recs.forEach(r => {
-    const v = (r.data.drop_value || '').toLowerCase().trim();
-    if (v === 'yes') CFG.yesId = r.data.bo_display_id;
-    if (v === 'no')  CFG.noId  = r.data.bo_display_id;
-  });
-  console.log('[YesNo] yesId=', CFG.yesId, 'noId=', CFG.noId, '| raw:', JSON.stringify(recs.map(r=>r.data)));
-  const ind = document.getElementById('yn-indicator');
-  if (CFG.yesId && CFG.noId) {
-    ind.className = 'yn-status yn-ok';
-    ind.textContent = `Y/N: ${CFG.yesId}/${CFG.noId}`;
-  } else {
-    ind.className = 'yn-status yn-err';
-    ind.textContent = 'Y/N: failed';
-    throw new Error(`Yes/No lookup IDs not resolved (yes=${CFG.yesId}, no=${CFG.noId}). Check object ${CFG.yesNoObj}.`);
+  if (!roleId) {
+    showError(
+      'No role_id specified',
+      'Usage: role_detail.html?role_id=YOUR_ROLE_ID'
+    );
+    return;
+  }
+
+  try {
+    // Find the master record by role_id field
+    const enc = encodeURIComponent(`role_id : '${roleId}'`);
+    const masterData = await GET(`/api/v2/objects/${CFG.masterObj}/records?page_size=10&query=${enc}`);
+    const records = masterData.records || [];
+
+    if (!records.length) {
+      showError(
+        `Role "${roleId}" not found`,
+        'Check the role_id parameter or verify this role exists in the system.'
+      );
+      return;
+    }
+
+    const master = records[0];
+    const d = master.data || {};
+
+    // Load entitlements in parallel
+    const entEnc = encodeURIComponent(`workday_job_profile_id : '${roleId}'`);
+    const entData = await GET(`/api/v2/objects/${CFG.entObj}/records?page_size=100&query=${entEnc}`);
+    const ents = entData.records || [];
+
+    renderPage(d, master.data.bo_display_id, ents);
+
+    // Show export/print buttons now that we have data
+    document.getElementById('hdrActions').style.display = 'flex';
+
+    // Store for CSV export
+    window._roleData  = d;
+    window._entData   = ents;
+    window._roleId    = roleId;
+
+  } catch (e) {
+    showError('Failed to load role', e.message);
   }
 }
 
-// Helper: resolve "yes"/"no" string to the real lookup ID
-function ynObj(val) {
-  const v = String(val).toLowerCase().trim();
-  const isYes = (v === 'yes' || v === '1');
-  return { id: isYes ? CFG.yesId : CFG.noId, value: isYes ? 'Yes' : 'No' };
-}
+function renderPage(d, recId, ents) {
+  const st  = resolveStatus(d.role_status);
+  const bv  = d.is_bes?.value    || '—';
+  const lc  = d.role_last_changed ? new Date(d.role_last_changed).toLocaleString() : '—';
 
-// Helper: resolve "yes"/"no" string to the real lookup ID
-function ynId(val) {
-  const v = String(val).toLowerCase().trim();
-  if (v === 'yes' || v === '1') return CFG.yesId;
-  if (v === 'no'  || v === '2') return CFG.noId;
-  return CFG.noId; // safe default
-}
-// ═══════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════
-async function init() {
-  setSt('Loading…');
-  try {
-    await Promise.all([loadUsers(), loadServiceItems(), loadYesNo()]);
-    setSt('');
-    await loadMasters();
-  } catch(e) { setSt(e.message, true); toast(e.message,'e'); }
-}
+  const entRows = ents.length
+    ? ents.map(r => {
+        const e = r.data || {};
+        const isBes = (e.entitlement_is_bes?.value || '').toLowerCase() === 'yes';
+        return `<tr>
+          <td class="mono">${cell(e.entitlement_type?.value)}</td>
+          <td class="trunc" title="${e.entitlement_item?.value || ''}">${cell(e.entitlement_item?.value)}</td>
+          <td class="trunc" title="${e.physical_access?.value || ''}">${cell(e.physical_access?.value)}</td>
+          <td class="trunc" title="${e.location?.value || ''}">${cell(e.location?.value)}</td>
+          <td>${badge(e.entitlement_is_bes?.value)}</td>
+          <td class="trunc" style="font-size:11px" title="${e.provisioning_owner?.value || ''}">${shortName(e.provisioning_owner?.value)}</td>
+          <td class="trunc" style="font-size:11px" title="${e.approval_owner?.value || ''}">${shortName(e.approval_owner?.value)}</td>
+          <td class="notes-cell" title="${(e.notes || '').replace(/"/g, '&quot;')}">${cell(e.notes)}</td>
+        </tr>`;
+      }).join('')
+    : `<tr class="lrow"><td colspan="8">No entitlements found for this role</td></tr>`;
 
-function setSt(m,e=false){ const el=document.getElementById('hst'); el.textContent=m; el.style.color=e?'#ff6b6b':'var(--muted)'; }
+  document.getElementById('pageContent').innerHTML = `
+    <div class="role-header">
+      <div class="role-title">
+        <div class="role-id">${d.role_id || '—'}</div>
+        <div class="role-sub">Record ID: ${recId} &nbsp;·&nbsp; Last changed: ${lc}</div>
+      </div>
+      <div class="role-fields">
+        <div class="fg">
+          <span class="fl">Status</span>
+          ${statusBadge(d.role_status)}
+        </div>
+        <div class="fg">
+          <span class="fl">BES</span>
+          ${badge(bv)}
+        </div>
+      </div>
+    </div>
 
-async function loadUsers() {
-  try {
-    const [a,r] = await Promise.allSettled([GET('/api/v2/agents?per_page=100'), GET('/api/v2/requesters?per_page=100')]);
-    const agents = a.status==='fulfilled' ? (a.value.agents||[]) : [];
-    const reqs   = r.status==='fulfilled' ? (r.value.requesters||[]) : [];
-    const seen=new Set();
-    allUsers = [...agents,...reqs].filter(u=>{ if(seen.has(u.id)) return false; seen.add(u.id); return true; })
-      .map(u=>({ id:u.id, name:u.first_name?`${u.first_name} ${u.last_name||''}`.trim():(u.name||''), email:u.email||'' }));
-  } catch(e){ console.warn('loadUsers:',e.message); }
-}
-
-async function loadServiceItems() {
-  try {
-    const d = await GET('/api/v2/service_catalog/items?per_page=100');
-    const items = d.service_items || d.items || [];
-    const sel = document.getElementById('ef_item');
-    sel.innerHTML = '<option value="">— none —</option>';
-    items.forEach(i=>{ const o=document.createElement('option'); o.value=i.id; o.textContent=i.name||i.display_name||String(i.id); sel.appendChild(o); });
-  } catch(e){ console.warn('loadServiceItems:',e.message); }
-}
-
-// ═══════════════════════════════════════════
-//  ROLE MASTERS
-// ═══════════════════════════════════════════
-async function loadMasters() {
-  const el=document.getElementById('rlist');
-  el.innerHTML='<div class="empty"><p style="font-size:11px;font-family:var(--mono)">Loading…</p></div>';
-  try {
-    const d=await GET(`/api/v2/objects/${CFG.masterObj}/records?page_size=100`);
-    allRoles=d.records||[]; filtRoles=[...allRoles]; renderList();
-  } catch(e){ el.innerHTML=`<div class="empty"><p style="color:#ff6b6b;font-size:11px;font-family:var(--mono)">${e.message}</p></div>`; toast(e.message,'e'); }
-}
-
-function renderList() {
-  const el=document.getElementById('rlist');
-  if(!filtRoles.length){ el.innerHTML='<div class="empty"><p style="font-size:11px">No roles found</p></div>'; return; }
-  el.innerHTML=filtRoles.map(r=>{
-    const d=r.data||{};
-    const st=resolveStatus(d.role_status);
-    const isSel=selRole&&String(selRole.data.bo_display_id)===String(r.data.bo_display_id);
-    return `<div class="ri ${isSel?'sel':''}" onclick="selectRole('${r.data.bo_display_id}')">
-      <span class="dot ${st.dot}"></span>
-      <span class="rid">${d.role_id||'—'}</span>
+    <div class="sh">
+      <h3>Entitlements</h3>
+      <span class="cb">${ents.length}</span>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th>Type</th>
+          <th>Item</th>
+          <th>Physical Access</th>
+          <th>Location</th>
+          <th>BES</th>
+          <th>Prov. Owner</th>
+          <th>Appr. Owner</th>
+          <th>Justification</th>
+        </tr></thead>
+        <tbody>${entRows}</tbody>
+      </table>
     </div>`;
-  }).join('');
-}
-
-function filterRoles(q){ const lq=q.toLowerCase(); filtRoles=allRoles.filter(r=>(r.data?.role_id||'').toLowerCase().includes(lq)); renderList(); }
-
-async function selectRole(id) {
-  selRole=allRoles.find(r=>String(r.data.bo_display_id)===String(id));
-  if(!selRole) return;
-  renderList();
-  const d=selRole.data||{};
-  const st=resolveStatus(d.role_status);
-  const bv=d.is_bes?.value||'—';
-  const lc=d.role_last_changed?new Date(d.role_last_changed).toLocaleString():'—';
-  document.getElementById('nosel').style.display='none';
-  document.getElementById('detail').style.display='flex';
-  document.getElementById('dtitle').textContent=d.role_id||'—';
-  document.getElementById('dname').textContent = d.role_name || '—';
-  document.getElementById('dmeta').textContent=`Last changed: ${lc}  ·  Record ID: ${selRole.data.bo_display_id}`;
-  document.getElementById('mcard').innerHTML=`
-    <div class="fg"><span class="fl">Role ID</span><span class="fv" style="color:var(--accent)">${d.role_id||'—'}</span></div>
-    <div class="fg"><span class="fl">Role Name</span><span class="fv" style="color:var(--accent)">${d.role_name||'—'}</span></div>
-    <div class="fg"><span class="fl">Status</span><span class="badge ${st.cls}">${st.label}</span></div>
-    <div class="fg"><span class="fl">BES</span><span class="badge ${bv.toLowerCase()==='yes'?'b-yes':'b-no'}">${bv}</span></div>
-    <div class="fg"><span class="fl">Last Changed</span><span class="fv">${lc}</span></div>
-    <div class="fg"><span class="fl">Record ID</span><span class="fv" style="font-size:11px;color:var(--muted)">${selRole.data.bo_display_id}</span></div>`;
-  await loadEnts(d.role_id);
 }
 
 // ═══════════════════════════════════════════
-//  MASTER CRUD
+//  CSV EXPORT
 // ═══════════════════════════════════════════
-function openNewMaster() {
-  editMId=null;
-  set('modMT','New Role'); set('modMS','');
-  document.getElementById('mf_rid').readOnly=false;
-  document.getElementById('mf_rid').value='';
-  document.getElementById('mf_rname').value='';
-  document.getElementById('mf_bes').value='no';
-  document.getElementById('mf_lc').value=nowLocal();
-  show('modM');
-}
+function exportCSV() {
+  const d    = window._roleData  || {};
+  const ents = window._entData   || [];
+  const rid  = window._roleId    || 'role';
 
-function openEditMaster() {
-  if(!selRole) return;
-  const d=selRole.data||{};
-  editMId=selRole.data.bo_display_id;
-  set('modMT','Edit Role'); set('modMS',d.role_id||'');
-  document.getElementById('mf_rid').readOnly=true;
-  document.getElementById('mf_rid').value=d.role_id||'';
-  document.getElementById('mf_bes').value=(d.is_bes?.value||'No').toLowerCase();
-  document.getElementById('mf_rname').value=d.role_name||'';
-  document.getElementById('mf_lc').value=d.role_last_changed?new Date(d.role_last_changed).toISOString().slice(0,16):nowLocal();
-  show('modM');
-}
+  const headers = [
+    'Role ID','Status','BES','Last Changed',
+    'Ent Type','Ent Item','Physical Access','Location',
+    'Ent BES','Prov. Owner','Appr. Owner','Justification'
+  ];
 
-async function saveMaster() {
-  const rid   = document.getElementById('mf_rid').value.trim();
-  const besVal= document.getElementById('mf_bes').value;  // "yes" or "no"
-  const lc    = document.getElementById('mf_lc').value;
-  const rname = document.getElementById('mf_rname').value.trim();
-  if(!rid){ toast('Role ID is required','e'); return; }
-  if(!rname){ toast('Role Name is required','e'); return; }
-  if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
-  
-  const isNew = !editMId;
-  const payload={ data:{
-    role_id:          rid,
-    role_name:        rname,
-    // role_status: set to "New" on create; omitted on edit (Workflow Automator owns this field)
-    ...(isNew ? { role_status: STATUS_NEW_ID } : {}),
-    is_bes:    isNew ? ynId(besVal) : { id: ynId(besVal) },
-    role_last_changed: lc ? new Date(lc).toISOString() : new Date().toISOString()
-  }};
+  const lc = d.role_last_changed ? new Date(d.role_last_changed).toLocaleString() : '';
+  const st = resolveStatus(d.role_status);
+  const baseInfo = [
+    csv(d.role_id), csv(st.label), csv(d.is_bes?.value), csv(lc)
+  ];
 
-  console.log('[saveMaster] payload:', JSON.stringify(payload));
-  busy('btnMS',true);
-  try {
-    if(editMId){
-      await PUT(`/api/v2/objects/${CFG.masterObj}/records/${editMId}`, payload);
-      toast('Role updated','s');
-    } else {
-      await POST(`/api/v2/objects/${CFG.masterObj}/records`, payload);
-      toast('Role created','s');
-    }
-    closeM('modM');
-    await loadMasters();
-    if(editMId){
-      const u=allRoles.find(r=>String(r.data.bo_display_id)===String(editMId));
-      if(u) await selectRole(u.data.bo_display_id);
-    }
-  } catch(e){ toast('Save failed: '+e.message,'e'); console.error('[saveMaster] error:', e.message); }
-  finally{ busy('btnMS',false); }
-}
-
-function confirmDelMaster() {
-  if(!selRole) return;
-  const rid=selRole.data?.role_id||selRole.data.bo_display_id;
-  confirm_(`Delete Role "${rid}"?`,
-    `Permanently removes this Role Master record.<br><strong>Entitlements for this role are NOT auto-deleted.</strong>`,
-    async()=>{
-      try{
-        await DEL(`/api/v2/objects/${CFG.masterObj}/records/${selRole.data.bo_display_id}`);
-        toast(`Role ${rid} deleted`,'s');
-        selRole=null;
-        document.getElementById('detail').style.display='none';
-        document.getElementById('nosel').style.display='block';
-        await loadMasters();
-      } catch(e){ toast('Delete failed: '+e.message,'e'); }
+  let rows;
+  if (ents.length) {
+    rows = ents.map(r => {
+      const e = r.data || {};
+      return [
+        ...baseInfo,
+        csv(e.entitlement_type?.value),
+        csv(e.entitlement_item?.value),
+        csv(e.physical_access?.value),
+        csv(e.location?.value),
+        csv(e.entitlement_is_bes?.value),
+        csv(e.provisioning_owner?.value),
+        csv(e.approval_owner?.value),
+        csv(e.notes),
+      ].join(',');
     });
+  } else {
+    rows = [[...baseInfo, '', '', '', '', '', '', '', ''].join(',')];
+  }
+
+  const content = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([content], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `role_${rid}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
-async function cloneRole() {
-  if(!selRole) return;
-  if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
-  const d=selRole.data||{}, ts=new Date().toTimeString().slice(0,5).replace(':','');
-
-  // Preserve BES from source record using its resolved id
-  const srcBesId = d.is_bes?.id || CFG.noId;
-
-  const payload={ data:{
-    is_active: CFG.noId,                  // 2
-    is_bes:    d.is_bes?.id || CFG.noId,  // preserve from source
-  }};
-
-  console.log('[cloneRole] payload:', JSON.stringify(payload));
-  try{
-    await POST(`/api/v2/objects/${CFG.masterObj}/records`, payload);
-    toast(`Cloned as ${payload.data.role_id} (inactive)`,'s');
-    await loadMasters();
-  } catch(e){ toast('Clone failed: '+e.message,'e'); console.error('[cloneRole] error:', e.message); }
+function csv(v) {
+  if (v == null || v === '') return '';
+  return '"' + String(v).replace(/"/g, '""') + '"';
 }
-
-// ═══════════════════════════════════════════
-//  ENTITLEMENTS
-// ═══════════════════════════════════════════
-async function loadEnts(roleId) {
-  const tb=document.getElementById('etb');
-  tb.innerHTML='<tr class="lrow"><td colspan="9"><span class="spn"></span> Loading…</td></tr>';
-  document.getElementById('ecnt').textContent='…';
-  try {
-    const enc=encodeURIComponent(`workday_job_profile_id : '${roleId}'`);
-    const d=await GET(`/api/v2/objects/${CFG.entObj}/records?page_size=100&query=${enc}`);
-    const recs=d.records||[];
-    document.getElementById('ecnt').textContent=recs.length;
-    renderEnts(recs); tb._r=recs;
-  } catch(e){ tb.innerHTML=`<tr class="lrow"><td colspan="9" style="color:#ff6b6b">${e.message}</td></tr>`; toast(e.message,'e'); }
-}
-
-function renderEnts(recs) {
-  const tb=document.getElementById('etb');
-  if(!recs.length){ tb.innerHTML='<tr class="lrow"><td colspan="9">No entitlements for this role</td></tr>'; return; }
-  tb.innerHTML=recs.map(r=>{
-    const d=r.data||{}, bv=d.entitlement_is_bes?.value||'—', isBes=bv.toLowerCase()==='yes';
-    return `<tr>
-      <td class="mono">${d.workday_job_profile_id||'—'}</td>
-      <td>${d.entitlement_type?.value||'—'}</td>
-      <td class="trunc" title="${d.entitlement_item?.value||''}">${d.entitlement_item?.value||'—'}</td>
-      <td class="trunc" title="${d.physical_access?.value||''}">${d.physical_access?.value||'—'}</td>
-      <td class="trunc" title="${d.location?.value||''}">${d.location?.value||'—'}</td>
-      <td><span class="badge ${isBes?'b-yes':'b-no'}">${bv}</span></td>
-      <td class="trunc" style="font-size:11px" title="${d.provisioning_owner?.value||''}">${sName(d.provisioning_owner?.value)}</td>
-      <td class="trunc" style="font-size:11px" title="${d.approval_owner?.value||''}">${sName(d.approval_owner?.value)}</td>
-      <td><div class="ra">
-        <button class="btn bg" title="Edit"   onclick="openEditEnt('${r.data.bo_display_id}')">✎</button>
-        <button class="btn bg" title="Clone"  onclick="cloneEnt('${r.data.bo_display_id}')">⧉</button>
-        <button class="btn bg" title="Delete" style="color:#ff6b6b" onclick="confirmDelEnt('${r.data.bo_display_id}')">✕</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-  tb._r=recs;
-}
-
-function openNewEnt() {
-  if(!selRole) return;
-  editEId=null;
-  set('modET','New Entitlement'); set('modES','Role: '+(selRole.data?.role_id||''));
-  document.getElementById('ef_jp').value=selRole.data?.role_id||'';
-  ['ef_tp','ef_bes','ef_item','ef_pa','ef_loc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('ef_notes').value='';
-  document.getElementById('ef_pot').value=''; document.getElementById('ef_poi').value='';
-  document.getElementById('ef_aot').value=''; document.getElementById('ef_aoi').value='';
-  show('modE');
-}
-
-function openEditEnt(id) {
-  const rec=(document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(id));
-  if(!rec){ toast('Record not found — refresh and retry','e'); return; }
-  const d=rec.data||{};
-  editEId=rec.data.bo_display_id;
-  set('modET','Edit Entitlement'); set('modES','ID: '+id);
-  document.getElementById('ef_jp').value   =d.workday_job_profile_id||'';
-  document.getElementById('ef_notes').value=d.notes||'';
-  setSel('ef_tp',  d.entitlement_type?.id);
-  setSel('ef_bes', d.entitlement_is_bes?.value ? d.entitlement_is_bes.value.toLowerCase() : '');
-  setSel('ef_item',d.entitlement_item?.id);
-  setSel('ef_pa',  d.physical_access?.id);
-  setSel('ef_loc', d.location?.id);
-  document.getElementById('ef_pot').value=d.provisioning_owner?.value||'';
-  document.getElementById('ef_poi').value=d.provisioning_owner?.id   ||'';
-  document.getElementById('ef_aot').value=d.approval_owner?.value    ||'';
-  document.getElementById('ef_aoi').value=d.approval_owner?.id       ||'';
-  show('modE');
-}
-
-async function cloneEnt(id) {
-  const rec=(document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(id));
-  if(!rec){ toast('Record not found','e'); return; }
-  const p=buildEP(rec.data||{}); p.data.notes=(rec.data?.notes||'')+' [CLONE]';
-  try{ await POST(`/api/v2/objects/${CFG.entObj}/records`,p); toast('Entitlement cloned','s'); await loadEnts(selRole.data.role_id); }
-  catch(e){ toast('Clone failed: '+e.message,'e'); }
-}
-
-async function saveEnt() {
-  const isNew = !editEId;
-  
-  const jp   =document.getElementById('ef_jp').value.trim();
-  const notes=document.getElementById('ef_notes').value.trim();
-  const besVal=document.getElementById('ef_bes').value;   // "yes" or "no"
-  
-  const tpId =document.getElementById('ef_tp').value;
-  const poId =document.getElementById('ef_poi').value;
-  const aoId =document.getElementById('ef_aoi').value;
-  
-  if(!jp)    { toast('Job Profile ID is required','e'); return; }
-  if(!notes) { toast('Entitlement Justification is required','e'); return; }
-  if(!besVal){ toast('BES Entitlement is required','e'); return; }
-  if(!tpId)  { toast('Entitlement Type is required','e'); return; }
-  if(!poId)  { toast('Provisioning Owner required — select from dropdown','e'); return; }
-  if(!aoId)  { toast('Approval Owner required — select from dropdown','e'); return; }
-  if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
-
-  const itemId=document.getElementById('ef_item').value;
-  const paId  =document.getElementById('ef_pa').value;
-  const locId =document.getElementById('ef_loc').value;
-
-  const payload={ data:{
-    workday_job_profile_id: jp,
-    notes,
-    entitlement_type:   isNew ? parseInt(tpId)  : { id: parseInt(tpId) },
-    entitlement_is_bes: isNew ? ynId(besVal)    : { id: ynId(besVal) },
-    provisioning_owner: isNew ? parseInt(poId)  : { id: parseInt(poId) },
-    approval_owner:     isNew ? parseInt(aoId)  : { id: parseInt(aoId) },
-  ...(itemId ? { entitlement_item: isNew ? parseInt(itemId) : { id: parseInt(itemId) } } : {}),
-  ...(paId   ? { physical_access:  isNew ? parseInt(paId)  : { id: parseInt(paId)  } } : {}),
-  ...(locId  ? { location:         isNew ? parseInt(locId) : { id: parseInt(locId) } } : {}),
-  }};
-
-  console.log('[saveEnt] payload:', JSON.stringify(payload));
-  busy('btnES',true);
-  try{
-    if(editEId){ await PUT(`/api/v2/objects/${CFG.entObj}/records/${editEId}`,payload); toast('Entitlement updated','s'); }
-    else       { await POST(`/api/v2/objects/${CFG.entObj}/records`,payload);           toast('Entitlement created','s'); }
-    closeM('modE'); await loadEnts(selRole.data.role_id);
-  } catch(e){ toast('Save failed: '+e.message,'e'); console.error('[saveEnt] error:', e.message); }
-  finally{ busy('btnES',false); }
-}
-
-function confirmDelEnt(id) {
-  confirm_('Delete Entitlement?','Permanently removes this entitlement. Cannot be undone.',
-    async()=>{
-      try{
-        await DEL(`/api/v2/objects/${CFG.entObj}/records/${id}`);
-        toast('Deleted','s');
-        await loadEnts(selRole.data.role_id);
-      } catch(e){ toast('Delete failed: '+e.message,'e'); }
-    });
-}
-
-function buildEP(d) {
-  return { data:{
-    workday_job_profile_id: d.workday_job_profile_id||'',
-    notes: d.notes||'',
-    ...(d.entitlement_type?.id    ? { entitlement_type:   { id: d.entitlement_type.id   } } : {}),
-    ...(d.entitlement_is_bes?.id  ? { entitlement_is_bes: { id: d.entitlement_is_bes.id } } : {}),
-    ...(d.provisioning_owner?.id  ? { provisioning_owner: { id: d.provisioning_owner.id } } : {}),
-    ...(d.approval_owner?.id      ? { approval_owner:     { id: d.approval_owner.id     } } : {}),
-    ...(d.entitlement_item?.id    ? { entitlement_item:   { id: d.entitlement_item.id   } } : {}),
-    ...(d.physical_access?.id     ? { physical_access:    { id: d.physical_access.id    } } : {}),
-    ...(d.location?.id            ? { location:           { id: d.location.id           } } : {}),
-  }};
-}
-
-// ═══════════════════════════════════════════
-//  USER AUTOCOMPLETE
-// ═══════════════════════════════════════════
-function filterU(tId,hId,dId) {
-  const q=document.getElementById(tId).value.toLowerCase().trim(), dd=document.getElementById(dId);
-  if(!q){ dd.style.display='none'; document.getElementById(hId).value=''; return; }
-  const m=allUsers.filter(u=>u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)).slice(0,8);
-  if(!m.length){ dd.style.display='none'; return; }
-  dd.innerHTML=m.map(u=>`<div class="udi" onmousedown="pickU('${tId}','${hId}','${dId}',${u.id},'${esc(u.name)}','${u.email}')"><div>${u.name}</div><div class="ue">${u.email}</div></div>`).join('');
-  dd.style.display='block';
-}
-function pickU(tId,hId,dId,id,name,email){
-  document.getElementById(tId).value=`${name} <${email}>`; document.getElementById(hId).value=id; document.getElementById(dId).style.display='none';
-}
-document.addEventListener('click',e=>{
-  ['ef_pod','ef_aod'].forEach(id=>{ const dd=document.getElementById(id); if(dd&&!dd.contains(e.target)&&e.target.id!=='ef_pot'&&e.target.id!=='ef_aot') dd.style.display='none'; });
-});
-
-// ═══════════════════════════════════════════
-//  UTILITIES
-// ═══════════════════════════════════════════
-const show    = id => document.getElementById(id).style.display='flex';
-const closeM  = id => document.getElementById(id).style.display='none';
-const set     = (id,v) => document.getElementById(id).textContent=v;
-const setSel  = (id,v) => { if(v!=null) document.getElementById(id).value=String(v); };
-const sName   = v => { if(!v) return '—'; const m=v.match(/^(.+?)\s*</); return m?m[1]:v; };
-const esc     = s => (s||'').replace(/'/g,"\\'");
-const nowLocal= () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16); };
-
-function busy(id,b){ const el=document.getElementById(id); if(!el) return; el.disabled=b; if(b){el._t=el.innerHTML;el.innerHTML='<span class="spn"></span> Saving…';}else{el.innerHTML=el._t||'Save';} }
-
-function confirm_(title,msg,cb){
-  set('cfT',title); document.getElementById('cfMsg').innerHTML=msg;
-  document.getElementById('cfOk').onclick=async()=>{ closeM('modC'); await cb(); };
-  show('modC');
-}
-
-function toast(msg,type='i'){
-  const c=document.getElementById('tc'), e=document.createElement('div');
-  e.className=`toast t-${type}`; e.textContent=msg; c.appendChild(e); setTimeout(()=>e.remove(),4000);
-}
-
-document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.style.display='none'; }));
 
 // ═══════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════
-if(typeof app !== 'undefined' && typeof app.initialized === 'function'){
-  app.initialized().then(()=>init());
-} else {
-  init();
-}
+init();
 function toggleTheme() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   const next = isLight ? 'dark' : 'light';
@@ -955,7 +400,6 @@ function toggleTheme() {
     });
   }
 })();
-
 </script>
 </body>
 </html>
