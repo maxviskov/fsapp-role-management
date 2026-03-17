@@ -785,20 +785,24 @@ function baseAudit(eventTypeId) {
 }
 
 // Build a Role Mgmt audit record — POC fields only
-// Only sends fields that exist in the current Compliance Audit Trail object:
-// Audit_Record_ID (auto), Event_Timestamp (auto), Role_ID, Event_Type, Badge_Disabled_At, Created_By_Agent_ID
+// Fields: Audit_Record_ID, Event_Timestamp, Role_ID, Event_Type, Previous_Value, New_Value
 function buildRoleAudit(eventTypeId, roleData, extraFields = {}) {
   const d = roleData || {};
   const rec = { ...baseAudit(eventTypeId) };
-  setIfVal(rec, 'role_id', d.role_id);
+  setIfVal(rec, 'role_id',        d.role_id);
+  setIfVal(rec, 'previous_value', extraFields.previous_value);
+  setIfVal(rec, 'new_value',      extraFields.new_value);
   if (extraFields._extra) Object.assign(rec, extraFields._extra);
   return rec;
 }
 
 // Build an Entitlement audit record — POC fields only
+// Fields: Audit_Record_ID, Event_Timestamp, Role_ID, Event_Type, Previous_Value, New_Value
 function buildEntAudit(eventTypeId, entData, roleId, isBesRole, extraFields = {}) {
   const rec = { ...baseAudit(eventTypeId) };
-  setIfVal(rec, 'role_id', roleId);
+  setIfVal(rec, 'role_id',        roleId);
+  setIfVal(rec, 'previous_value', extraFields.previous_value);
+  setIfVal(rec, 'new_value',      extraFields.new_value);
   if (extraFields._extra) Object.assign(rec, extraFields._extra);
   return rec;
 }
@@ -835,10 +839,22 @@ async function init() {
   setSt('Loading…');
   initAuditObjId();
   try {
-    await Promise.all([loadUsers(), loadServiceItems(), loadYesNo()]);
-    setSt('');
+    // loadUsers and loadServiceItems are already non-fatal internally
+    // loadYesNo wrapped in allSettled so a failure doesn't block loadMasters
+    const [,, ynResult] = await Promise.allSettled([loadUsers(), loadServiceItems(), loadYesNo()]);
+    if (ynResult.status === 'rejected') {
+      setSt('Y/N lookup failed: ' + ynResult.reason?.message, true);
+      toast('Y/N lookup failed — saves may not work', 'e');
+    } else {
+      setSt('');
+    }
     await loadMasters();
-  } catch(e) { setSt(e.message, true); toast(e.message,'e'); }
+  } catch(e) {
+    setSt(e.message, true);
+    toast(e.message, 'e');
+    document.getElementById('rlist').innerHTML =
+      `<div class="empty"><p style="color:#ff6b6b;font-size:11px;font-family:var(--mono)">${e.message}</p></div>`;
+  }
 }
 
 function setSt(m,e=false){ const el=document.getElementById('hst'); el.textContent=m; el.style.color=e?'#ff6b6b':'var(--muted)'; }
@@ -1069,13 +1085,9 @@ async function saveMaster() {
     // ── Write audit record for Role_Definition_Changed ──────────────────────
     // Only on edit (create goes through Role_Assigned / onboarding journey)
     if (!isNew && CFG.auditObj) {
-      const prev = buildDiff(oldData, data, ['role_name','nerc_cip_standard','revocation_window_hours','physical_revocation_window_hours']);
-      const newV = buildDiff(data, oldData, ['role_name','nerc_cip_standard','revocation_window_hours','physical_revocation_window_hours']);
       await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, { ...oldData, ...savedData }, {
-        action_taken: 'Modified',
-        previous_value: prev,
-        new_value:      newV,
-        justification:  'Role definition updated via Role Master Manager',
+        previous_value: JSON.stringify(oldData, null, 0),
+        new_value:      JSON.stringify(savedData, null, 0),
       }));
     }
 
@@ -1322,47 +1334,58 @@ async function saveEnt() {
 
   busy('btnES',true);
   try {
-    let savedData;
     if(editEId){
-      const res = await PUT(`/api/v2/objects/${CFG.entObj}/records/${editEId}`, payload);
-      savedData = res?.data || payload.data;
+      await PUT(`/api/v2/objects/${CFG.entObj}/records/${editEId}`, payload);
       toast('Entitlement updated','s');
     } else {
-      const res = await POST(`/api/v2/objects/${CFG.entObj}/records`, payload);
-      savedData = res?.data || payload.data;
+      await POST(`/api/v2/objects/${CFG.entObj}/records`, payload);
       toast('Entitlement created','s');
     }
+
+    // Fetch the full saved record so audit snapshot has resolved lookup values
+    // (API response to PUT/POST returns bare IDs, not {id, value} objects)
+    let savedData = payload.data; // fallback
+    try {
+      const enc = encodeURIComponent(`workday_job_profile_id : '${jp}'`);
+      const fresh = await GET(`/api/v2/objects/${CFG.entObj}/records?page_size=100&query=${enc}`);
+      const recs = fresh.records || [];
+      const matched = editEId
+        ? recs.find(r => String(r.data.bo_display_id) === String(editEId))
+        : recs.sort((a,b) => b.data.bo_display_id - a.data.bo_display_id)[0];
+      if (matched) savedData = matched.data;
+    } catch(e) { console.warn('[saveEnt] fresh fetch failed:', e.message); }
 
     // ── Write audit records ──────────────────────────────────────────────────
     if (CFG.auditObj) {
       const isBesRole = (selRole?.data?.is_bes?.value || '').toLowerCase() === 'yes';
       const roleId    = selRole?.data?.role_id || jp;
+      // Full JSON snapshots — captures every field regardless of what changed
+      const snapOld = Object.keys(oldData).length ? JSON.stringify(oldData, null, 0) : null;
+      const snapNew = JSON.stringify(savedData, null, 0);
 
       if (isNew) {
-        // Entitlement_Added
         await writeAudit(buildEntAudit(EVT.ENT_ADDED, savedData, roleId, isBesRole, {
-          action_taken: 'Granted',
-          new_value:    describeEnt(savedData),
+          previous_value: null,
+          new_value:      snapNew,
         }));
-        // Role_Definition_Changed (role structure modified)
         await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
-          action_taken:  'Modified',
-          previous_value: 'Entitlement added',
-          new_value:      describeEnt(savedData),
-          justification: notes,
+          previous_value: null,
+          new_value:      snapNew,
         }));
       } else {
-        // Entitlement_Removed (old) + Entitlement_Added (new) — treated as modification
+        // Entitlement_Removed — snapshot of record BEFORE the change
+        await writeAudit(buildEntAudit(EVT.ENT_REMOVED, oldData, roleId, isBesRole, {
+          previous_value: snapOld,
+          new_value:      null,
+        }));
+        // Entitlement_Added — snapshot of record AFTER the change
         await writeAudit(buildEntAudit(EVT.ENT_ADDED, savedData, roleId, isBesRole, {
-          action_taken:  'Modified',
-          previous_value: describeEnt(oldData),
-          new_value:      describeEnt(savedData),
+          previous_value: snapOld,
+          new_value:      snapNew,
         }));
         await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
-          action_taken:  'Modified',
-          previous_value: describeEnt(oldData),
-          new_value:      describeEnt(savedData),
-          justification: notes,
+          previous_value: snapOld,
+          new_value:      snapNew,
         }));
       }
     }
@@ -1389,16 +1412,14 @@ function confirmDelEnt(id) {
 
         // Write Entitlement_Removed audit record
         if (CFG.auditObj) {
+          const snapOld = JSON.stringify(oldData, null, 0);
           await writeAudit(buildEntAudit(EVT.ENT_REMOVED, oldData, roleId, isBesRole, {
-            action_taken:   'Revoked',
-            previous_value: describeEnt(oldData),
-            new_value:      'Entitlement removed',
+            previous_value: snapOld,
+            new_value:      null,
           }));
           await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
-            action_taken:   'Modified',
-            previous_value: describeEnt(oldData),
-            new_value:      'Entitlement removed',
-            justification:  'Entitlement deleted via Role Master Manager',
+            previous_value: snapOld,
+            new_value:      null,
           }));
         }
 
