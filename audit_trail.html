@@ -62,16 +62,16 @@
     .act-row{display:flex;gap:8px;margin-left:auto}
 
     /* ── TABLE ── */
-    .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    thead th{background:var(--surface2);padding:9px 12px;text-align:left;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:52px;z-index:10}
+    .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow-x:auto}
+    table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+    thead th{background:var(--surface2);padding:9px 12px;text-align:left;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:2px solid var(--border);white-space:nowrap}
     thead th.srt{cursor:pointer;user-select:none}
     thead th.srt:hover{color:var(--text)}
     tbody tr.main-row{border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--t)}
-    tbody tr.main-row:hover{background:rgba(79,142,247,.05)}
-    tbody tr.main-row.expanded{background:rgba(79,142,247,.07);border-bottom:none}
-    tbody tr.detail-row{border-bottom:1px solid var(--border)}
-    tbody tr.detail-row td{padding:0}
+    tbody tr.main-row td{border-bottom:1px solid var(--border)}
+    tbody tr.main-row:hover td{background:rgba(79,142,247,.05)}
+    tbody tr.main-row.expanded td{background:rgba(79,142,247,.07);border-bottom:none}
+    tbody tr.detail-row td{padding:0;border-bottom:1px solid var(--border)}
     .detail-inner{padding:14px 20px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;background:rgba(79,142,247,.03);border-top:1px solid rgba(79,142,247,.15)}
     .detail-section{grid-column:1/-1;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--border);margin-top:6px;margin-bottom:2px;padding-bottom:5px;border-bottom:1px solid var(--border)}
     .detail-section:first-child{margin-top:0}
@@ -190,7 +190,7 @@
           <button class="btn bg2" onclick="collapseAll()">⊟ Collapse All</button>
         </div>
       </div>
-      <div class="tw">
+      <div class="tw" style="overflow-x:auto">
         <table id="resultsTable">
           <thead>
             <tr>
@@ -378,26 +378,19 @@ async function runQuery() {
   const fromDate  = document.getElementById('q_from').value;
   const toDate    = document.getElementById('q_to').value;
 
-  // Build query string
+  // FS custom objects API does NOT support OR — only single equality conditions.
+  // Domain (= multiple event types) and date range are filtered client-side after fetch.
   const conditions = [];
 
   if (eventType) {
+    // Specific event type selected — single equality, safe to send to API
     conditions.push(`event_type : '${eventType}'`);
-  } else if (domain) {
-    // Query all event types for this domain using OR
-    const types = EVENT_VOCAB[domain] || [];
-    if (types.length) {
-      const orParts = types.map(t => `event_type : '${t.value}'`).join(' OR ');
-      conditions.push(`(${orParts})`);
-    }
   }
+  // Domain-only (no specific event type) → fetch all, filter client-side
 
   if (ctxVal && domain && CTX_CONFIG[domain]) {
     conditions.push(`${CTX_CONFIG[domain].fieldKey} : '${ctxVal}'`);
   }
-
-  if (fromDate) conditions.push(`event_timestamp : >='${fromDate}T00:00:00Z'`);
-  if (toDate)   conditions.push(`event_timestamp : <='${toDate}T23:59:59Z'`);
 
   const queryStr = conditions.length ? `&query=${encodeURIComponent(conditions.join(' AND '))}` : '';
 
@@ -406,7 +399,6 @@ async function runQuery() {
   document.getElementById('resultsWrap').style.display = 'none';
 
   try {
-    // Paginate — fetch up to 500 records (5 pages of 100)
     let allRecs = [];
     let page = 1;
     while (page <= 5) {
@@ -418,7 +410,25 @@ async function runQuery() {
       page++;
     }
 
-    allResults = allRecs.map(r => flattenRecord(r));
+    let filtered = allRecs.map(r => flattenRecord(r));
+
+    // Client-side: filter by domain (OR across event types)
+    if (domain && !eventType) {
+      const domainEvents = new Set((EVENT_VOCAB[domain] || []).map(e => e.value));
+      filtered = filtered.filter(r => domainEvents.has(r.event_type_raw));
+    }
+
+    // Client-side: date range filter
+    if (fromDate) {
+      const from = new Date(fromDate + 'T00:00:00Z');
+      filtered = filtered.filter(r => r.event_timestamp && new Date(r.event_timestamp) >= from);
+    }
+    if (toDate) {
+      const to = new Date(toDate + 'T23:59:59Z');
+      filtered = filtered.filter(r => r.event_timestamp && new Date(r.event_timestamp) <= to);
+    }
+
+    allResults = filtered;
     sortResults();
     renderResults();
   } catch(e) {
