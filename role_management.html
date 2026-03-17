@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Role Detail</title>
+  <title>Role Master Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -15,42 +15,91 @@
       --r:6px;--t:150ms ease;
     }
     [data-theme="light"] {
-  --bg:#f0f2f7;--surface:#ffffff;--surface2:#e8ebf2;--border:#d0d6e8;
-  --text:#1a2035;--muted:#6272a4;--accent:#2563eb;--accent2:#059669;
-  --danger:#dc2626;--warn:#d97706;
-}
+      --bg:#f0f2f7;--surface:#ffffff;--surface2:#e8ebf2;--border:#d0d6e8;
+      --text:#1a2035;--muted:#6272a4;--accent:#2563eb;--accent2:#059669;
+      --danger:#dc2626;--warn:#d97706;
+    }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
-    #app{display:flex;flex-direction:column;min-height:100vh}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;height:100vh;overflow:hidden}
+    #app{display:flex;flex-direction:column;height:100vh}
 
     /* HEADER */
-    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0}
     .logo{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:2px;text-transform:uppercase;border:1px solid var(--accent);padding:3px 8px;border-radius:3px}
     header h1{font-size:14px;font-weight:500}
     .sp1{flex:1}
     .env{font-family:var(--mono);font-size:10px;color:var(--warn);border:1px solid var(--warn);padding:2px 7px;border-radius:3px}
+    #hst{font-family:var(--mono);font-size:11px;color:var(--muted)}
 
-    /* CONTENT */
-    .page{max-width:1100px;margin:0 auto;padding:28px 24px 48px}
+    /* LAYOUT */
+    .body{display:flex;flex:1;overflow:hidden}
 
-    /* ERROR STATE */
-    .errstate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:12px;color:var(--muted)}
-    .errstate .ico{font-size:40px;opacity:.3}
-    .errstate h2{font-size:16px;font-weight:500;color:var(--danger)}
-    .errstate p{font-size:12px;font-family:var(--mono);color:var(--muted)}
+    /* LEFT */
+    .left{width:272px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+    .ph{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+    .ph h2{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
+    .sb{padding:9px 12px;border-bottom:1px solid var(--border)}
+    .sb input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color var(--t)}
+    .sb input::placeholder{color:var(--muted)}
+    .sb input:focus{border-color:var(--accent)}
+    #rlist{flex:1;overflow-y:auto;padding:5px 0}
+    #rlist::-webkit-scrollbar{width:4px}
+    #rlist::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+    .ri{padding:9px 14px;cursor:pointer;border-left:3px solid transparent;transition:background var(--t),border-color var(--t);display:flex;align-items:center;gap:8px}
+    .ri:hover{background:var(--surface2)}
+    .ri.sel{background:rgba(79,142,247,0.1);border-left-color:var(--accent)}
+    .rid{font-family:var(--mono);font-size:12px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .dy{background:var(--accent2)} .dn{background:var(--muted)}
+    .ds-new{background:var(--accent)}
+    .ds-review{background:var(--warn)}
+    .ds-active{background:var(--accent2)}
+    .ds-inactive{background:var(--muted)}
+    .pf{padding:9px 12px;border-top:1px solid var(--border)}
 
-    /* LOADING STATE */
-    .loading{display:flex;align-items:center;justify-content:center;min-height:60vh;gap:10px;color:var(--muted);font-family:var(--mono);font-size:12px}
+    /* RIGHT */
+    .right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .dh{padding:13px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);flex-shrink:0}
+    .drt{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent)}
+    .dnm{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--muted)}
+    .drm{font-size:11px;color:var(--muted);margin-top:2px}
+    .db{flex:1;overflow-y:auto;padding:18px 20px}
+    .db::-webkit-scrollbar{width:4px}
+    .db::-webkit-scrollbar-thumb{background:var(--border)}
 
-    /* ROLE HEADER CARD */
-    .role-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:24px;display:flex;align-items:flex-start;gap:32px;flex-wrap:wrap}
-    .role-title{display:flex;flex-direction:column;gap:4px}
-    .role-id{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--accent)}
-    .role-sub{font-size:11px;color:var(--muted)}
-    .role-fields{display:flex;gap:28px;flex-wrap:wrap;margin-top:2px}
-    .fg{display:flex;flex-direction:column;gap:4px}
+    /* MASTER CARD */
+    .mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+    .fg{display:flex;flex-direction:column;gap:3px}
     .fl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
     .fv{font-family:var(--mono);font-size:13px}
+
+    /* COMPLIANCE CARD */
+    .cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:18px}
+    .cc-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px}
+    .cc-section{margin-bottom:14px}
+    .cc-section:last-child{margin-bottom:0}
+    .cc-section-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--border);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+    .cc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px}
+    .fv-na{font-family:var(--mono);font-size:12px;color:var(--border)}
+
+    /* SECTION HEADER */
+    .sh{display:flex;align-items:center;margin-bottom:11px;gap:10px}
+    .sh h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
+    .cb{background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);padding:2px 7px;border-radius:10px}
+
+    /* SECTION DIVIDER in modal */
+    .sec-div{grid-column:span 2;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+
+    /* TABLE */
+    .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    thead th{background:var(--surface2);padding:8px 11px;text-align:left;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);white-space:nowrap}
+    tbody tr{border-bottom:1px solid var(--border);transition:background var(--t)}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:rgba(255,255,255,.025)}
+    td{padding:8px 11px;vertical-align:middle}
+    td.mono{font-family:var(--mono);font-size:11px}
+    .trunc{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
     /* BADGES */
     .badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.4px;white-space:nowrap;display:inline-block}
@@ -58,331 +107,1376 @@
     .b-no{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
     .b-act{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
     .b-ina{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
-    /* Role_Status badges */
     .b-st-new{background:rgba(79,142,247,.15);color:var(--accent);border:1px solid rgba(79,142,247,.3)}
     .b-st-review{background:rgba(255,169,77,.15);color:var(--warn);border:1px solid rgba(255,169,77,.3)}
     .b-st-active{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
     .b-st-inactive{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
+    .b-cip{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.2);font-size:9px}
 
-    /* SECTION */
-    .sh{display:flex;align-items:center;margin-bottom:12px;gap:10px}
-    .sh h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
-    .cb{background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);padding:2px 7px;border-radius:10px}
+    /* ROW ACTIONS */
+    .ra{display:flex;gap:3px;opacity:0;transition:opacity var(--t)}
+    tbody tr:hover .ra{opacity:1}
 
-    /* TABLE */
-    .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:28px}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    thead th{background:var(--surface2);padding:9px 12px;text-align:left;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);white-space:nowrap}
-    tbody tr{border-bottom:1px solid var(--border);transition:background var(--t)}
-    tbody tr:last-child{border-bottom:none}
-    tbody tr:hover{background:rgba(255,255,255,.025)}
-    td{padding:9px 12px;vertical-align:middle}
-    td.mono{font-family:var(--mono);font-size:11px}
-    .trunc{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    /* EMPTY / LOADING */
+    .empty{padding:56px 20px;text-align:center;color:var(--muted)}
+    .empty .ico{font-size:30px;margin-bottom:10px;opacity:.35}
     .lrow td{text-align:center;padding:28px;color:var(--muted);font-family:var(--mono);font-size:11px}
 
-    /* NOTES CELL */
-    .notes-cell{max-width:200px;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help}
-
-    /* PRINT / EXPORT */
-    .actions{display:flex;gap:8px;align-items:center}
+    /* BUTTONS */
     .btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--r);border:none;cursor:pointer;transition:opacity var(--t),transform var(--t);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-    .btn:hover{opacity:.82;transform:translateY(-1px)}
+    .btn:hover:not(:disabled){opacity:.82;transform:translateY(-1px)}
     .btn:active{transform:translateY(0)}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .bp{background:var(--accent);color:#fff}
     .bs{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+    .bd{background:rgba(255,107,107,.15);color:#ff6b6b;border:1px solid rgba(255,107,107,.3)}
+    .bg{background:transparent;color:var(--muted);border:1px solid transparent;padding:4px 7px;font-size:11px}
+    .bg:hover{color:var(--text);border-color:var(--border);opacity:1!important;transform:none!important}
+    .bsm{padding:4px 9px;font-size:11px}
+
+    /* MODAL */
+    .ov{position:fixed;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);animation:fi 120ms ease}
+    @keyframes fi{from{opacity:0}to{opacity:1}}
+    .mo{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:560px;max-height:88vh;display:flex;flex-direction:column;animation:su 150ms ease}
+    .mow{width:700px}
+    .mowl{width:780px}
+    @keyframes su{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .moh{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .moh h3{font-size:14px;font-weight:600;flex:1}
+    .msub{font-family:var(--mono);font-size:11px;color:var(--accent)}
+    .mob{padding:18px 20px;overflow-y:auto;flex:1}
+    .mob::-webkit-scrollbar{width:4px}
+    .mob::-webkit-scrollbar-thumb{background:var(--border)}
+    .mof{padding:13px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+
+    /* FORM */
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+    .s2{grid-column:span 2}
+    .s3{grid-column:span 3}
+    .ff{display:flex;flex-direction:column;gap:5px}
+    .ff label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+    .ff label .req{color:var(--danger);margin-left:2px}
+    .ff input,.ff select,.ff textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color var(--t);width:100%}
+    .ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--accent)}
+    .ff input[readonly]{opacity:.55;cursor:not-allowed}
+    .ff textarea{resize:vertical;min-height:68px;font-family:var(--sans);font-size:12px}
+    .ff select option{background:var(--surface2)}
+    .hint{font-size:10px;color:var(--muted);margin-top:2px}
+
+    /* USER AUTOCOMPLETE */
+    .uw{position:relative}
+    .udd{position:absolute;top:100%;left:0;right:0;z-index:200;background:var(--surface2);border:1px solid var(--accent);border-top:none;border-radius:0 0 var(--r) var(--r);max-height:180px;overflow-y:auto}
+    .udi{padding:7px 10px;cursor:pointer;font-size:12px;transition:background var(--t)}
+    .udi:hover{background:rgba(79,142,247,.15)}
+    .ue{font-size:10px;color:var(--muted);font-family:var(--mono)}
+
+    /* AUDIT LOG PANEL */
+    .audit-strip{background:rgba(79,142,247,.04);border:1px solid rgba(79,142,247,.15);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .audit-strip .ai{font-size:10px;font-family:var(--mono);color:var(--muted);flex:1}
+    .audit-strip .as{font-size:10px;font-family:var(--mono)}
+    .audit-ok{color:var(--accent2)}
+    .audit-err{color:var(--danger)}
+    .audit-pend{color:var(--warn)}
+
+    /* TOAST */
+    #tc{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:2000}
+    .toast{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;font-size:12px;display:flex;align-items:center;gap:8px;min-width:250px;animation:sir 180ms ease}
+    @keyframes sir{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .t-s{border-left:3px solid var(--accent2)}
+    .t-e{border-left:3px solid #ff6b6b}
+    .t-i{border-left:3px solid var(--accent)}
+
+    /* CONFIRM */
+    .moc{width:420px}
+    .cbody{color:var(--muted);font-size:13px;line-height:1.6}
 
     /* SPINNER */
-    .spn{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+    .spn{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* PRINT STYLES */
-    @media print {
-      body{background:#fff;color:#000}
-      header{background:#fff;border-bottom:1px solid #ccc;position:static}
-      .logo{color:#333;border-color:#333}
-      .env,.actions{display:none}
-      .role-header,.tw{border:1px solid #ccc;background:#fff}
-      .fl,.muted{color:#666}
-      .role-id{color:#1a4faf}
-      thead th{background:#f0f0f0;color:#444}
-      tbody tr:hover{background:transparent}
-      .badge{print-color-adjust:exact;-webkit-print-color-adjust:exact}
-      .page{padding:16px 0}
-    }
+    /* YES/NO DEBUG INDICATOR */
+    .yn-status{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;margin-left:6px}
+    .yn-ok{color:var(--accent2);border:1px solid rgba(56,217,169,.3)}
+    .yn-err{color:var(--danger);border:1px solid rgba(255,107,107,.3)}
+
+    /* NULL STRATEGY TOGGLE */
+    .ns-wrap{display:flex;align-items:center;gap:6px}
+    .ns-wrap label{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+    #nullStrategy{font-family:var(--mono);font-size:10px;background:var(--surface2);border:1px solid var(--border);color:var(--warn);border-radius:3px;padding:2px 6px;cursor:pointer;outline:none}
+
+    /* AUDIT OBJECT STATUS */
+    .aud-obj{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px}
+    .aud-obj-ok{color:var(--accent2);border:1px solid rgba(56,217,169,.3)}
+    .aud-obj-err{color:var(--danger);border:1px solid rgba(255,107,107,.3)}
+    .aud-obj-skip{color:var(--muted);border:1px solid var(--border)}
   </style>
 </head>
 <body>
 <div id="app">
   <header>
     <span class="logo">VELCO</span>
-    <h1>Role Detail</h1>
+    <h1>Role Master Manager</h1>
     <div class="sp1"></div>
-    <div class="actions" id="hdrActions" style="display:none">
-      <button class="btn bs" onclick="exportCSV()">⬇ Export CSV</button>
-      <button class="btn bs" onclick="window.print()">⎙ Print</button>
+    <span id="hst"></span>
+    <span id="yn-indicator"></span>
+    <span id="aud-indicator" class="aud-obj aud-obj-skip" title="Audit Trail object status">AUD: —</span>
+    <div class="ns-wrap" title="How blank Physical Access / Location is sent to API">
+      <label>null strat:</label>
+      <select id="nullStrategy">
+        <option value="omit" selected>omit field</option>
+        <option value="null">send null</option>
+        <option value="id-null">{ id: null }</option>
+      </select>
     </div>
     <button class="btn bs" id="themeBtn" onclick="toggleTheme()" style="padding:5px 9px;font-size:13px">☀</button>
     <span class="env">DEV / BETA</span>
   </header>
-  <div class="page" id="pageContent">
-    <div class="loading"><span class="spn"></span>&nbsp;Loading role…</div>
+  <div class="body">
+
+    <!-- LEFT PANEL -->
+    <div class="left">
+      <div class="ph">
+        <h2>Role Master</h2>
+        <button class="btn bp bsm" onclick="openNewMaster()">+ New</button>
+      </div>
+      <div class="sb"><input id="srch" type="text" placeholder="Search Role ID…" oninput="filterRoles(this.value)"/></div>
+      <div id="rlist"><div class="empty"><p style="font-size:11px;font-family:var(--mono)">Loading…</p></div></div>
+      <div class="pf"><button class="btn bs" style="width:100%;font-size:11px" onclick="loadMasters()">↻ Refresh</button></div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right">
+      <div id="nosel" class="empty" style="margin:auto">
+        <div class="ico">⬡</div>
+        <p>Select a role from the list</p>
+        <p style="margin-top:5px;font-size:11px;font-family:var(--mono);color:var(--muted)">or create a new one</p>
+      </div>
+      <div id="detail" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+        <div class="dh">
+          <div>
+            <div class="drt" id="dtitle">—</div>
+            <div class="dnm" id="dname">—</div>
+            <div class="drm" id="dmeta">—</div>
+          </div>
+          <div class="sp1"></div>
+          <button class="btn bs bsm" onclick="cloneRole()">⧉ Clone</button>
+          <button class="btn bs bsm" onclick="openEditMaster()">✎ Edit</button>
+          <button class="btn bd bsm" onclick="confirmDelMaster()">✕ Delete</button>
+        </div>
+        <div class="db">
+          <!-- Core info card -->
+          <div class="mc" id="mcard"></div>
+          <!-- Compliance fields card -->
+          <div class="cc" id="ccard">
+            <div class="cc-title">⚖ Compliance Classification</div>
+            <div id="cc-grid"></div>
+          </div>
+          <!-- Entitlements -->
+          <div class="sh">
+            <h3>Entitlements</h3>
+            <span class="cb" id="ecnt">—</span>
+            <button class="btn bp bsm" onclick="openNewEnt()">+ Add Entitlement</button>
+          </div>
+          <div class="tw">
+            <table>
+              <thead><tr>
+                <th>Job Profile ID</th><th>Type</th><th>Item</th>
+                <th>Physical Access</th><th>Location</th><th>BES</th>
+                <th>CIP Std</th><th>Scope</th>
+                <th>Prov. Owner</th><th>Appr. Owner</th><th></th>
+              </tr></thead>
+              <tbody id="etb"><tr class="lrow"><td colspan="11">Select a role to load entitlements</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="tc"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: Role Master
+     ══════════════════════════════════════════════════════════ -->
+<div id="modM" class="ov" style="display:none">
+  <div class="mo mowl">
+    <div class="moh"><h3 id="modMT">New Role</h3><span class="msub" id="modMS"></span><button class="btn bg" onclick="closeM('modM')" style="padding:4px 8px">✕</button></div>
+    <div class="mob">
+      <div class="fg2">
+
+        <!-- ── Core identity ── -->
+        <div class="sec-div s2">Core Identity</div>
+        <div class="ff">
+          <label>Role ID <span class="req">*</span></label>
+          <input type="text" id="mf_rid" placeholder="e.g. 100102"/>
+        </div>
+        <div class="ff">
+          <label>Role Name <span class="req">*</span></label>
+          <input type="text" id="mf_rname" placeholder="e.g. System Administrator"/>
+        </div>
+        <div class="ff">
+          <label>BES <span class="req">*</span></label>
+          <select id="mf_bes">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Last Changed <span class="req">*</span></label>
+          <input type="datetime-local" id="mf_lc"/>
+        </div>
+
+        <!-- ── Compliance classification ── -->
+        <div class="sec-div s2">Compliance Classification</div>
+        <div class="ff">
+          <label>NERC CIP Standard</label>
+          <input type="text" id="mf_cip" placeholder="e.g. CIP-004-7"/>
+        </div>
+        <div class="ff">
+          <label>Revocation Window (hours)</label>
+          <input type="number" id="mf_rwh" placeholder="e.g. 24"/>
+        </div>
+        <div class="ff">
+          <label>Requires PRA Background Check</label>
+          <select id="mf_pra">
+            <option value="">— not set —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Physical Revocation Window (hours)</label>
+          <input type="number" id="mf_prwh" placeholder="e.g. 24"/>
+        </div>
+
+        <!-- ── Lifecycle ── -->
+        <div class="sec-div s2">Lifecycle</div>
+        <div class="ff">
+          <label>Role Effective Date</label>
+          <input type="date" id="mf_eff"/>
+        </div>
+        <div class="ff">
+          <label>Role Expiry Date</label>
+          <input type="date" id="mf_exp"/>
+        </div>
+        <div class="ff">
+          <label>Next Review Date</label>
+          <input type="date" id="mf_nrd"/>
+        </div>
+      </div>
+    </div>
+    <div class="mof">
+      <button class="btn bs" onclick="closeM('modM')">Cancel</button>
+      <button class="btn bp" id="btnMS" onclick="saveMaster()">Save Role</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: Entitlement
+     ══════════════════════════════════════════════════════════ -->
+<div id="modE" class="ov" style="display:none">
+  <div class="mo mowl">
+    <div class="moh"><h3 id="modET">New Entitlement</h3><span class="msub" id="modES"></span><button class="btn bg" onclick="closeM('modE')" style="padding:4px 8px">✕</button></div>
+    <div class="mob">
+      <div class="fg2">
+
+        <!-- ── Core entitlement fields ── -->
+        <div class="sec-div s2">Entitlement</div>
+        <div class="ff">
+          <label>Workday Job Profile ID <span class="req">*</span></label>
+          <input type="text" id="ef_jp" readonly/>
+        </div>
+        <div class="ff">
+          <label>Entitlement Type <span class="req">*</span></label>
+          <select id="ef_tp">
+            <option value="">— select —</option>
+            <option value="1">Application</option>
+            <option value="2">Physical Access</option>
+            <option value="3">Equipment</option>
+            <option value="4">Software</option>
+            <option value="5">Security Group</option>
+            <option value="6">Shared Account</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>BES Entitlement <span class="req">*</span></label>
+          <select id="ef_bes">
+            <option value="">— select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Entitlement Item</label>
+          <select id="ef_item"><option value="">— none —</option></select>
+          <span class="hint">From service catalog</span>
+        </div>
+        <div class="ff">
+          <label>Physical Access</label>
+          <select id="ef_pa">
+            <option value="">— none —</option>
+            <option value="1">NHOF - Basement Storage Ent</option>
+            <option value="2">NHOF - BCC Secure Suite</option>
+            <option value="3">NHOF - Data Center</option>
+            <option value="4">NHOF - Electrical Rm</option>
+            <option value="5">NHOF - Elevator Machine Rm</option>
+            <option value="6">NHOF - EMS Cage</option>
+            <option value="7">NHOF - General</option>
+            <option value="8">NHOF - Generator Bldg</option>
+            <option value="9">NHOF - Mechanical Rm</option>
+            <option value="10">NHOF - Security Office</option>
+            <option value="11">Only Part of Master Access*</option>
+            <option value="12">Pinn - Bld 100 Electrical Rm</option>
+            <option value="13">Pinn - Bld 100 EMS/OPS Office</option>
+            <option value="14">Pinn - Bld 100 Security Office</option>
+            <option value="15">Pinn - Bld 100 Telecom Office</option>
+            <option value="16">Pinn - Bld 200 Network Closet</option>
+            <option value="17">Pinn - Bldg 100 - North ODR Ent.</option>
+            <option value="18">Pinn - Bldg 100 IT Office</option>
+            <option value="19">Pinn - Bldg 100 Mezzanine Ent</option>
+            <option value="20">Pinn - Bldg 300 Net Closet</option>
+            <option value="21">Pinn - DC East Corridor</option>
+            <option value="22">Pinn - DC General access</option>
+            <option value="23">Pinn - DC Generator Bldg</option>
+            <option value="24">Pinn - EMS Cage</option>
+            <option value="25">Pinn - MSF - Record Retention</option>
+            <option value="26">Pinn - UPS-C Bldg</option>
+            <option value="27">Pinn - Whse Mechanical Rm</option>
+            <option value="28">Pinn - Whse Secure Storage</option>
+            <option value="29">Pinn - Whse Secure Storage Key Cab</option>
+            <option value="30">Pinn - Whse Telecom Lab N. Ent</option>
+            <option value="31">Pinn Bldg-100 Training Rm Hall Ent</option>
+            <option value="32">Pinnacle General</option>
+            <option value="33">Pinnacle MCC</option>
+            <option value="34">Redmond Rd Warehouse</option>
+            <option value="35">Sub - Low &amp; Non Qualifying</option>
+            <option value="36">Sub - Medium</option>
+            <option value="37">Sub - Medium with ERC</option>
+            <option value="38">Wenlock</option>
+            <option value="39">NHOF - Backup Control Center</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Location</label>
+          <select id="ef_loc">
+            <option value="">— none —</option>
+            <optgroup label="Vermont (primary)">
+              <option value="37000240717">New Haven Operating Facility</option>
+              <option value="37000240719">— NHOF Datacenter</option>
+              <option value="37000240715">Pinnacle Ridge</option>
+              <option value="37000240718">— Building 100</option>
+              <option value="37000240716">— Pinnacle Datacenter</option>
+              <option value="37000378754">Rutland</option>
+            </optgroup>
+            <optgroup label="Americas">
+              <option value="37000240701">America</option>
+              <option value="37000240706">— US</option>
+              <option value="37000240714">—— Vermont</option>
+              <option value="37000240705">— Canada</option>
+            </optgroup>
+            <optgroup label="Other regions">
+              <option value="37000240703">Asia</option>
+              <option value="37000240712">— China</option>
+              <option value="37000240711">— India</option>
+              <option value="37000240713">— Japan</option>
+              <option value="37000240704">Australia</option>
+              <option value="37000240702">Europe</option>
+              <option value="37000240707">— France</option>
+              <option value="37000240709">— Germany</option>
+              <option value="37000240710">— Italy</option>
+              <option value="37000240708">— United Kingdom</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Provisioning Owner <span class="req">*</span></label>
+          <div class="uw">
+            <input type="text" id="ef_pot" placeholder="Type name or email…" oninput="filterU('ef_pot','ef_poi','ef_pod')" autocomplete="off"/>
+            <div id="ef_pod" class="udd" style="display:none"></div>
+          </div>
+          <input type="hidden" id="ef_poi"/>
+        </div>
+        <div class="ff">
+          <label>Approval Owner <span class="req">*</span></label>
+          <div class="uw">
+            <input type="text" id="ef_aot" placeholder="Type name or email…" oninput="filterU('ef_aot','ef_aoi','ef_aod')" autocomplete="off"/>
+            <div id="ef_aod" class="udd" style="display:none"></div>
+          </div>
+          <input type="hidden" id="ef_aoi"/>
+        </div>
+        <div class="ff s2">
+          <label>Entitlement Justification <span class="req">*</span></label>
+          <textarea id="ef_notes" placeholder="Reason this entitlement is required…"></textarea>
+        </div>
+
+        <!-- ── Compliance fields ── -->
+        <div class="sec-div s2">Compliance & Classification</div>
+        <div class="ff">
+          <label>CIP Standard</label>
+          <input type="text" id="ef_cip" placeholder="e.g. CIP-007-6 R5.1"/>
+          <span class="hint">Required when BES = Yes</span>
+        </div>
+        <div class="ff">
+          <label>System Scope</label>
+          <select id="ef_scope">
+            <option value="">— not set —</option>
+            <option value="ems">EMS-Only</option>
+            <option value="corp">Corporate-Only</option>
+            <option value="dual">Dual-Access</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Requires CATS Web Ticket</label>
+          <select id="ef_cats">
+            <option value="">— not set —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Entitlement Risk Level</label>
+          <select id="ef_risk">
+            <option value="">— not set —</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+
+        <!-- ── RFC & change tracking ── -->
+        <div class="sec-div s2">RFC & Change Tracking</div>
+        <div class="ff">
+          <label>RFC Required</label>
+          <select id="ef_rfcreq">
+            <option value="">— not set —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+          <span class="hint">Set Yes for all BES/BCSI</span>
+        </div>
+        <div class="ff">
+          <label>Effective Date</label>
+          <input type="date" id="ef_effdt"/>
+        </div>
+        <div class="ff">
+          <label>Expiry Date</label>
+          <input type="date" id="ef_expdt"/>
+        </div>
+
+        <!-- ── Design-time approval (Audit fields) ── -->
+        <div class="sec-div s2">Design-Time Approval</div>
+        <div class="ff">
+          <label>Approved By</label>
+          <div class="uw">
+            <input type="text" id="ef_apbt" placeholder="Type name or email…" oninput="filterU('ef_apbt','ef_apbi','ef_apbd')" autocomplete="off"/>
+            <div id="ef_apbd" class="udd" style="display:none"></div>
+          </div>
+          <input type="hidden" id="ef_apbi"/>
+          <span class="hint">Design-time authorizer (distinct from Approval Owner)</span>
+        </div>
+        <div class="ff">
+          <label>Approval Date</label>
+          <input type="datetime-local" id="ef_appdt"/>
+        </div>
+
+      </div>
+    </div>
+    <div class="mof">
+      <button class="btn bs" onclick="closeM('modE')">Cancel</button>
+      <button class="btn bp" id="btnES" onclick="saveEnt()">Save Entitlement</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirm -->
+<div id="modC" class="ov" style="display:none">
+  <div class="mo moc">
+    <div class="moh"><h3 id="cfT">Confirm</h3><button class="btn bg" onclick="closeM('modC')" style="padding:4px 8px">✕</button></div>
+    <div class="mob"><p class="cbody" id="cfMsg"></p></div>
+    <div class="mof">
+      <button class="btn bs" onclick="closeM('modC')">Cancel</button>
+      <button class="btn bd" id="cfOk">Confirm</button>
+    </div>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════
-//  CONFIG — keep in sync with role_master_manager
+//  CONFIG
 // ═══════════════════════════════════════════
+// ⚠️ FRESHSERVICE LOOKUP FIELD QUIRK:
+// POST (create) → bare integer:  is_active: 1
+// PUT  (update) → id object:     is_active: { id: 1 }
+// Applies to ALL lookup fields universally.
 const CFG = {
   domain:    'velco-betabox.freshservice.com',
   apiKey:    'uloskM4yZXvLPVUdOxyD',
   masterObj: 37000019240,
   entObj:    37000019214,
   yesNoObj:  37000019262,
-  statusObj: 37000019266,              // Role_Status lookup object
+  auditObj:  null,   // resolved at boot from AUDIT_OBJ_ID constant below
   yesId: null,
   noId:  null,
 };
-// Role_Status record IDs (hardcoded — confirmed from object 37000019266)
-const ROLE_STATUS = {
-  1: { label: 'New',       cls: 'b-st-new'      },
-  2: { label: 'In Review', cls: 'b-st-review'   },
-  3: { label: 'Active',    cls: 'b-st-active'   },
-  4: { label: 'Inactive',  cls: 'b-st-inactive' },
-};
 
-function resolveStatus(statusField) {
-  if (!statusField) return ROLE_STATUS[1];
-  const id = statusField.id ?? statusField;
-  return ROLE_STATUS[id] || ROLE_STATUS[1];
-}
+// ── Audit Trail Object ID ──────────────────────────────────────────────────
+// Once you create the Compliance Audit Trail custom object in Freshservice,
+// paste its object ID here. Set to null to disable audit writing (POC mode).
+const AUDIT_OBJ_ID = 37000019275;
+
+// Role_Status record IDs (confirmed from object 37000019266)
+const ROLE_STATUS = {
+  1: { label: 'New',       cls: 'b-st-new',      dot: 'ds-new'      },
+  2: { label: 'In Review', cls: 'b-st-review',   dot: 'ds-review'   },
+  3: { label: 'Active',    cls: 'b-st-active',   dot: 'ds-active'   },
+  4: { label: 'Inactive',  cls: 'b-st-inactive', dot: 'ds-inactive' },
+};
+const STATUS_NEW_ID = 1;
 const BASE = 'https://' + CFG.domain;
 const HDR  = { Authorization: 'Basic ' + btoa(CFG.apiKey + ':X'), 'Content-Type': 'application/json' };
 
-const GET = async p => {
-  const r = await fetch(BASE + p, { headers: HDR });
-  if (!r.ok) throw new Error(`GET ${p} → ${r.status}`);
-  return r.json();
+// ═══════════════════════════════════════════
+//  HARDCODED LOOKUP MAPS
+// ═══════════════════════════════════════════
+const ENT_TYPE = {
+  1:'Application', 2:'Physical Access', 3:'Equipment',
+  4:'Software',    5:'Security Group',  6:'Shared Account'
+};
+
+const LOC = {
+  37000240701:'America',                37000240705:'Canada',
+  37000240706:'US',                     37000240714:'Vermont',
+  37000240717:'New Haven Operating Facility', 37000240719:'NHOF Datacenter',
+  37000240715:'Pinnacle Ridge',         37000240718:'Building 100',
+  37000240716:'Pinnacle Datacenter',    37000378754:'Rutland',
+  37000240703:'Asia',                   37000240712:'China',
+  37000240711:'India',                  37000240713:'Japan',
+  37000240704:'Australia',              37000240702:'Europe',
+  37000240707:'France',                 37000240709:'Germany',
+  37000240710:'Italy',                  37000240708:'United Kingdom'
+};
+
+function lk(map, id) { return id != null ? (map[id] || map[String(id)] || `#${id}`) : '—'; }
+
+function resolveStatus(statusField) {
+  if (!statusField) return ROLE_STATUS[STATUS_NEW_ID];
+  const id = statusField.id ?? statusField;
+  return ROLE_STATUS[id] || ROLE_STATUS[STATUS_NEW_ID];
+}
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let allRoles=[], filtRoles=[], selRole=null;
+let editMId=null, editEId=null, allUsers=[];
+// Track last saved entitlement for audit context
+let _lastEntCtx = null;
+
+// ═══════════════════════════════════════════
+//  API HELPERS
+// ═══════════════════════════════════════════
+const GET  = async p => { const r=await fetch(BASE+p,{headers:HDR}); if(!r.ok) throw new Error(`GET ${p} → ${r.status}`); return r.json(); };
+const POST = async (p,b) => { const r=await fetch(BASE+p,{method:'POST',headers:HDR,body:JSON.stringify(b)}); if(!r.ok){const t=await r.text();throw new Error(`POST ${p} → ${r.status}: ${t}`);} return r.json(); };
+const PUT  = async (p,b) => { const r=await fetch(BASE+p,{method:'PUT', headers:HDR,body:JSON.stringify(b)}); if(!r.ok){const t=await r.text();throw new Error(`PUT ${p} → ${r.status}: ${t}`);} return r.json(); };
+const DEL  = async p => { const r=await fetch(BASE+p,{method:'DELETE',headers:HDR}); if(!r.ok) throw new Error(`DELETE ${p} → ${r.status}`); };
+
+// ═══════════════════════════════════════════
+//  YES/NO LOOKUP
+// ═══════════════════════════════════════════
+async function loadYesNo() {
+  const d = await GET(`/api/v2/objects/${CFG.yesNoObj}/records?page_size=10`);
+  const recs = d.records || [];
+  recs.forEach(r => {
+    const v = (r.data.drop_value || '').toLowerCase().trim();
+    if (v === 'yes') CFG.yesId = r.data.bo_display_id;
+    if (v === 'no')  CFG.noId  = r.data.bo_display_id;
+  });
+  console.log('[YesNo] yesId=', CFG.yesId, 'noId=', CFG.noId);
+  const ind = document.getElementById('yn-indicator');
+  if (CFG.yesId && CFG.noId) {
+    ind.className = 'yn-status yn-ok';
+    ind.textContent = `Y/N: ${CFG.yesId}/${CFG.noId}`;
+  } else {
+    ind.className = 'yn-status yn-err';
+    ind.textContent = 'Y/N: failed';
+    throw new Error(`Yes/No IDs not resolved. Check object ${CFG.yesNoObj}.`);
+  }
+}
+
+function ynObj(val) {
+  const v = String(val).toLowerCase().trim();
+  const isYes = (v === 'yes' || v === '1');
+  return { id: isYes ? CFG.yesId : CFG.noId, value: isYes ? 'Yes' : 'No' };
+}
+
+function ynId(val) {
+  const v = String(val).toLowerCase().trim();
+  if (v === 'yes' || v === '1') return CFG.yesId;
+  if (v === 'no'  || v === '2') return CFG.noId;
+  return CFG.noId;
+}
+
+// ─── OPTIONAL LOOKUP FIELD HELPERS ──────────────────────────────────────────
+const OMIT = Symbol('omit');
+function getNullStrategy(){ return document.getElementById('nullStrategy').value; }
+function optionalLookup(rawId, isNew){
+  if(rawId) return isNew ? parseInt(rawId) : { id: parseInt(rawId) };
+  switch(getNullStrategy()){
+    case 'null':    return null;
+    case 'id-null': return { id: null };
+    default:        return OMIT;
+  }
+}
+function applyOptional(data, key, val){ if(val !== OMIT) data[key] = val; }
+
+// ─── OPTIONAL YES/NO FIELD (blank = omit) ────────────────────────────────────
+function applyYesNoOpt(data, key, val, isNew) {
+  if (!val) return; // blank select → omit
+  const id = ynId(val);
+  data[key] = isNew ? id : { id };
+}
+
+// ═══════════════════════════════════════════
+//  AUDIT TRAIL HELPERS
+// ═══════════════════════════════════════════
+function initAuditObjId() {
+  CFG.auditObj = AUDIT_OBJ_ID;
+  const el = document.getElementById('aud-indicator');
+  if (CFG.auditObj) {
+    el.className = 'aud-obj aud-obj-ok';
+    el.textContent = `AUD: ${CFG.auditObj}`;
+  } else {
+    el.className = 'aud-obj aud-obj-skip';
+    el.textContent = 'AUD: disabled';
+    console.log('[Audit] AUDIT_OBJ_ID not set — audit writing disabled. Set AUDIT_OBJ_ID once object is created.');
+  }
+}
+
+// Write one audit record; never throws — logs failure, shows toast in err.
+async function writeAudit(payload) {
+  if (!CFG.auditObj) {
+    console.log('[Audit] skipped (no auditObj):', payload);
+    return null;
+  }
+  try {
+    const result = await POST(`/api/v2/objects/${CFG.auditObj}/records`, { data: payload });
+    console.log('[Audit] written:', result?.data?.bo_display_id, '| event:', payload.event_type);
+    return result;
+  } catch(e) {
+    console.error('[Audit] write failed:', e.message, '| payload:', JSON.stringify(payload));
+    toast('Audit write failed: ' + e.message, 'e');
+    return null;
+  }
+}
+
+// Build a base audit record with Section 1 (record identity) fields
+// source_ticket_id: FS ticket or Journey ID if available (pass '' if none)
+// POC audit object has: Audit_Record_ID (auto), Event_Timestamp, Role_ID, Event_Type, Badge_Disabled_At, Created_By_Agent_ID
+// Only send event_type + event_timestamp in base — role_id added by callers
+function baseAudit(eventTypeId) {
+  return {
+    audit_record_id: 'AUD-' + Date.now() + '-' + Math.random().toString(36).slice(2,7).toUpperCase(),
+    event_type:      parseInt(eventTypeId),
+    event_timestamp: new Date().toISOString(),
+  };
+}
+
+// Build a Role Mgmt audit record — POC fields only
+// Only sends fields that exist in the current Compliance Audit Trail object:
+// Audit_Record_ID (auto), Event_Timestamp (auto), Role_ID, Event_Type, Badge_Disabled_At, Created_By_Agent_ID
+function buildRoleAudit(eventTypeId, roleData, extraFields = {}) {
+  const d = roleData || {};
+  const rec = { ...baseAudit(eventTypeId) };
+  setIfVal(rec, 'role_id', d.role_id);
+  if (extraFields._extra) Object.assign(rec, extraFields._extra);
+  return rec;
+}
+
+// Build an Entitlement audit record — POC fields only
+function buildEntAudit(eventTypeId, entData, roleId, isBesRole, extraFields = {}) {
+  const rec = { ...baseAudit(eventTypeId) };
+  setIfVal(rec, 'role_id', roleId);
+  if (extraFields._extra) Object.assign(rec, extraFields._extra);
+  return rec;
+}
+
+// Only add a key to the object if the value is non-empty
+function setIfVal(obj, key, val) {
+  if (val !== undefined && val !== null && val !== '' && val !== 0) obj[key] = val;
+}
+
+// Human-readable summary of an entitlement (used in new_value / previous_value)
+function describeEnt(d) {
+  const parts = [];
+  if (d.entitlement_type?.value) parts.push(d.entitlement_type.value);
+  if (d.entitlement_item?.value) parts.push(d.entitlement_item.value);
+  if (d.physical_access?.value)  parts.push('PA: ' + d.physical_access.value);
+  if (d.location?.value)         parts.push('Loc: ' + d.location.value);
+  return parts.join(' | ') || 'Entitlement record';
+}
+
+// ── Event Type Master IDs ────────────────────────────────────────────────────
+// These must match the record IDs in the Event Type Master custom object.
+// Hardcode once confirmed from the FS Event_Type_Master object records.
+// From the image: 1=Role_Definition_Changed, 2=Entitlement_Added, 3=Entitlement_Removed
+const EVT = {
+  ROLE_DEF_CHANGED:    1,
+  ENT_ADDED:           2,
+  ENT_REMOVED:         3,
 };
 
 // ═══════════════════════════════════════════
-//  PARSE URL PARAM
-// ═══════════════════════════════════════════
-function getRoleIdParam() {
-  const params = new URLSearchParams(window.location.search);
-  return (params.get('role_id') || params.get('roleId') || params.get('role') || '').trim();
-}
-
-// ═══════════════════════════════════════════
-//  RENDER HELPERS
-// ═══════════════════════════════════════════
-function showError(title, detail) {
-  document.getElementById('pageContent').innerHTML = `
-    <div class="errstate">
-      <div class="ico">⬡</div>
-      <h2>${title}</h2>
-      <p>${detail}</p>
-    </div>`;
-}
-
-function badge(val) {
-  if (!val) return '<span style="color:var(--muted)">—</span>';
-  const v = val.toLowerCase();
-  const cls = (v === 'yes') ? 'b-yes' : 'b-no';
-  return `<span class="badge ${cls}">${val}</span>`;
-}
-
-function activeBadge(val) {
-  if (!val) return '<span style="color:var(--muted)">—</span>';
-  const v = val.toLowerCase();
-  const cls = (v === 'yes') ? 'b-act' : 'b-ina';
-  return `<span class="badge ${cls}">${val}</span>`;
-}
-
-function statusBadge(statusField) {
-  const st = resolveStatus(statusField);
-  return `<span class="badge ${st.cls}">${st.label}</span>`;
-}
-
-function cell(v) { return v || '<span style="color:var(--muted)">—</span>'; }
-
-function shortName(v) {
-  if (!v) return '—';
-  const m = v.match(/^(.+?)\s*</);
-  return m ? m[1] : v;
-}
-
-// ═══════════════════════════════════════════
-//  MAIN
+//  INIT
 // ═══════════════════════════════════════════
 async function init() {
-  const roleId = getRoleIdParam();
-
-  if (!roleId) {
-    showError(
-      'No role_id specified',
-      'Usage: role_detail.html?role_id=YOUR_ROLE_ID'
-    );
-    return;
-  }
-
+  setSt('Loading…');
+  initAuditObjId();
   try {
-    // Find the master record by role_id field
-    const enc = encodeURIComponent(`role_id : '${roleId}'`);
-    const masterData = await GET(`/api/v2/objects/${CFG.masterObj}/records?page_size=10&query=${enc}`);
-    const records = masterData.records || [];
+    await Promise.all([loadUsers(), loadServiceItems(), loadYesNo()]);
+    setSt('');
+    await loadMasters();
+  } catch(e) { setSt(e.message, true); toast(e.message,'e'); }
+}
 
-    if (!records.length) {
-      showError(
-        `Role "${roleId}" not found`,
-        'Check the role_id parameter or verify this role exists in the system.'
-      );
-      return;
+function setSt(m,e=false){ const el=document.getElementById('hst'); el.textContent=m; el.style.color=e?'#ff6b6b':'var(--muted)'; }
+
+async function loadUsers() {
+  try {
+    const [a,r] = await Promise.allSettled([GET('/api/v2/agents?per_page=100'), GET('/api/v2/requesters?per_page=100')]);
+    const agents = a.status==='fulfilled' ? (a.value.agents||[]) : [];
+    const reqs   = r.status==='fulfilled' ? (r.value.requesters||[]) : [];
+    const seen=new Set();
+    allUsers = [...agents,...reqs].filter(u=>{ if(seen.has(u.id)) return false; seen.add(u.id); return true; })
+      .map(u=>({ id:u.id, name:u.first_name?`${u.first_name} ${u.last_name||''}`.trim():(u.name||''), email:u.email||'' }));
+  } catch(e){ console.warn('loadUsers:',e.message); }
+}
+
+async function loadServiceItems() {
+  try {
+    const d = await GET('/api/v2/service_catalog/items?per_page=100');
+    const items = d.service_items || d.items || [];
+    const sel = document.getElementById('ef_item');
+    sel.innerHTML = '<option value="">— none —</option>';
+    items.forEach(i=>{ const o=document.createElement('option'); o.value=i.id; o.textContent=i.name||i.display_name||String(i.id); sel.appendChild(o); });
+  } catch(e){ console.warn('loadServiceItems:',e.message); }
+}
+
+// ═══════════════════════════════════════════
+//  ROLE MASTERS
+// ═══════════════════════════════════════════
+async function loadMasters() {
+  const el=document.getElementById('rlist');
+  el.innerHTML='<div class="empty"><p style="font-size:11px;font-family:var(--mono)">Loading…</p></div>';
+  try {
+    const d=await GET(`/api/v2/objects/${CFG.masterObj}/records?page_size=100`);
+    allRoles=d.records||[];
+    allRoles.sort((a, b) => (a.data?.role_id || '').localeCompare(b.data?.role_id || '', undefined, { numeric: true }));
+    filtRoles=[...allRoles];
+    renderList();
+  } catch(e){ el.innerHTML=`<div class="empty"><p style="color:#ff6b6b;font-size:11px;font-family:var(--mono)">${e.message}</p></div>`; toast(e.message,'e'); }
+}
+
+function renderList() {
+  const el=document.getElementById('rlist');
+  if(!filtRoles.length){ el.innerHTML='<div class="empty"><p style="font-size:11px">No roles found</p></div>'; return; }
+  el.innerHTML=filtRoles.map(r=>{
+    const d=r.data||{};
+    const st=resolveStatus(d.role_status);
+    const isSel=selRole&&String(selRole.data.bo_display_id)===String(r.data.bo_display_id);
+    return `<div class="ri ${isSel?'sel':''}" onclick="selectRole('${r.data.bo_display_id}')">
+      <span class="dot ${st.dot}"></span>
+      <span class="rid">${d.role_id||'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+function filterRoles(q){
+  const lq=q.toLowerCase();
+  filtRoles=allRoles
+    .filter(r=>(r.data?.role_id||'').toLowerCase().includes(lq))
+    .sort((a, b) => (a.data?.role_id || '').localeCompare(b.data?.role_id || '', undefined, { numeric: true }));
+  renderList();
+}
+
+async function selectRole(id) {
+  selRole=allRoles.find(r=>String(r.data.bo_display_id)===String(id));
+  if(!selRole) return;
+  renderList();
+  const d=selRole.data||{};
+  const st=resolveStatus(d.role_status);
+  const bv=d.is_bes?.value||'—';
+  const lc=d.role_last_changed?new Date(d.role_last_changed).toLocaleString():'—';
+
+  document.getElementById('nosel').style.display='none';
+  document.getElementById('detail').style.display='flex';
+  document.getElementById('dtitle').textContent=d.role_id||'—';
+  document.getElementById('dname').textContent=d.role_name||'—';
+  document.getElementById('dmeta').textContent=`Last changed: ${lc}  ·  Record ID: ${selRole.data.bo_display_id}`;
+
+  document.getElementById('mcard').innerHTML=`
+    <div class="fg"><span class="fl">Role ID</span><span class="fv" style="color:var(--accent)">${d.role_id||'—'}</span></div>
+    <div class="fg"><span class="fl">Role Name</span><span class="fv" style="color:var(--accent)">${d.role_name||'—'}</span></div>
+    <div class="fg"><span class="fl">Status</span><span class="badge ${st.cls}">${st.label}</span></div>
+    <div class="fg"><span class="fl">BES</span><span class="badge ${bv.toLowerCase()==='yes'?'b-yes':'b-no'}">${bv}</span></div>
+    <div class="fg"><span class="fl">Last Changed</span><span class="fv">${lc}</span></div>
+    <div class="fg"><span class="fl">Record ID</span><span class="fv" style="font-size:11px;color:var(--muted)">${selRole.data.bo_display_id}</span></div>`;
+
+  // Build compliance card — always visible, dash for unpopulated fields
+  const na = `<span class="fv-na">—</span>`;
+  const praV = d.requires_pra_background_check?.value;
+  const createdBy = d.created_by?.value || null;
+  const createdDt = d.created_date ? fmtDateTime(d.created_date) : null;
+
+  const ccSections = [
+    {
+      label: 'Classification',
+      fields: [
+        { l: 'NERC CIP Std',     v: d.nerc_cip_standard ? `<span class="badge b-cip">${d.nerc_cip_standard}</span>` : na },
+        { l: 'Revoc. Window',    v: d.revocation_window_hours    != null ? `<span class="fv">${d.revocation_window_hours}h</span>`         : na },
+        { l: 'Phys. Revoc.',     v: d.physical_revocation_window_hours != null ? `<span class="fv">${d.physical_revocation_window_hours}h</span>` : na },
+        { l: 'PRA Required',     v: praV ? `<span class="badge ${praV.toLowerCase()==='yes'?'b-yes':'b-no'}">${praV}</span>` : na },
+      ]
+    },
+    {
+      label: 'Lifecycle',
+      fields: [
+        { l: 'Effective Date',   v: d.role_effective_date ? `<span class="fv">${fmtDate(d.role_effective_date)}</span>`                          : na },
+        { l: 'Expiry Date',      v: d.role_expiry_date    ? `<span class="fv" style="color:var(--warn)">${fmtDate(d.role_expiry_date)}</span>`    : na },
+        { l: 'Next Review',      v: d.next_review_date    ? `<span class="fv">${fmtDate(d.next_review_date)}</span>`                              : na },
+      ]
+    },
+    {
+      label: 'Authorship',
+      fields: [
+        { l: 'Created By',       v: createdBy ? `<span class="fv" style="font-size:11px">${sName(createdBy)}</span>` : na },
+        { l: 'Created Date',     v: createdDt ? `<span class="fv" style="font-size:11px">${createdDt}</span>`        : na },
+      ]
+    },
+  ];
+
+  document.getElementById('cc-grid').innerHTML = ccSections.map(s => `
+    <div class="cc-section" style="grid-column:1/-1">
+      <div class="cc-section-label">${s.label}</div>
+      <div class="cc-grid">${s.fields.map(f=>`<div class="fg"><span class="fl">${f.l}</span>${f.v}</div>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('ccard').style.display = '';
+
+  await loadEnts(d.role_id);
+}
+
+function fmtDate(v) {
+  if (!v) return '—';
+  try { return new Date(v).toLocaleDateString(); } catch { return v; }
+}
+function fmtDateTime(v) {
+  if (!v) return '—';
+  try { return new Date(v).toLocaleString(undefined, {dateStyle:'short', timeStyle:'short'}); } catch { return v; }
+}
+
+// ═══════════════════════════════════════════
+//  MASTER CRUD
+// ═══════════════════════════════════════════
+function openNewMaster() {
+  editMId=null;
+  set('modMT','New Role'); set('modMS','');
+  document.getElementById('mf_rid').readOnly=false;
+  ['mf_rid','mf_rname','mf_cip','mf_rwh','mf_prwh','mf_eff','mf_exp','mf_nrd'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('mf_bes').value='no';
+  document.getElementById('mf_pra').value='';
+  document.getElementById('mf_lc').value=nowLocal();
+  show('modM');
+}
+
+function openEditMaster() {
+  if(!selRole) return;
+  const d=selRole.data||{};
+  editMId=selRole.data.bo_display_id;
+  set('modMT','Edit Role'); set('modMS',d.role_id||'');
+  document.getElementById('mf_rid').readOnly=true;
+  document.getElementById('mf_rid').value=d.role_id||'';
+  document.getElementById('mf_bes').value=(d.is_bes?.value||'No').toLowerCase();
+  document.getElementById('mf_rname').value=d.role_name||'';
+  document.getElementById('mf_lc').value=d.role_last_changed?new Date(d.role_last_changed).toISOString().slice(0,16):nowLocal();
+  // Compliance fields
+  document.getElementById('mf_cip').value=d.nerc_cip_standard||'';
+  document.getElementById('mf_rwh').value=d.revocation_window_hours!=null?d.revocation_window_hours:'';
+  document.getElementById('mf_prwh').value=d.physical_revocation_window_hours!=null?d.physical_revocation_window_hours:'';
+  document.getElementById('mf_pra').value=d.requires_pra_background_check?.value?(d.requires_pra_background_check.value.toLowerCase()):'';
+  document.getElementById('mf_eff').value=d.role_effective_date?d.role_effective_date.slice(0,10):'';
+  document.getElementById('mf_exp').value=d.role_expiry_date?d.role_expiry_date.slice(0,10):'';
+  document.getElementById('mf_nrd').value=d.next_review_date?d.next_review_date.slice(0,10):'';
+  show('modM');
+}
+
+async function saveMaster() {
+  const rid    = document.getElementById('mf_rid').value.trim();
+  const besVal = document.getElementById('mf_bes').value;
+  const lc     = document.getElementById('mf_lc').value;
+  const rname  = document.getElementById('mf_rname').value.trim();
+  const cipStd = document.getElementById('mf_cip').value.trim();
+  const rwh    = document.getElementById('mf_rwh').value;
+  const prwh   = document.getElementById('mf_prwh').value;
+  const praVal = document.getElementById('mf_pra').value;
+  const eff    = document.getElementById('mf_eff').value;
+  const exp    = document.getElementById('mf_exp').value;
+  const nrd    = document.getElementById('mf_nrd').value;
+
+  if(!rid){ toast('Role ID is required','e'); return; }
+  if(!rname){ toast('Role Name is required','e'); return; }
+  if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
+
+  const isNew = !editMId;
+
+  // Snapshot old data for audit diff (before save)
+  const oldData = editMId ? (selRole?.data || {}) : null;
+
+  const data = {
+    role_id:           rid,
+    role_name:         rname,
+    ...(isNew ? { role_status: STATUS_NEW_ID } : {}),
+    is_bes:            isNew ? ynId(besVal) : { id: ynId(besVal) },
+    role_last_changed: lc ? new Date(lc).toISOString() : new Date().toISOString(),
+  };
+
+  // Optional text / number fields
+  if (cipStd)           data.nerc_cip_standard = cipStd;
+  if (rwh !== '')       data.revocation_window_hours = parseInt(rwh);
+  if (prwh !== '')      data.physical_revocation_window_hours = parseInt(prwh);
+  if (eff)              data.role_effective_date = eff;
+  if (exp)              data.role_expiry_date = exp;
+  if (nrd)              data.next_review_date = nrd;
+
+  // Optional Yes/No lookup fields
+  applyYesNoOpt(data, 'requires_pra_background_check', praVal, isNew);
+
+  console.log('[saveMaster] payload:', JSON.stringify({ data }));
+  busy('btnMS',true);
+  try {
+    let savedData;
+    if (editMId) {
+      const res = await PUT(`/api/v2/objects/${CFG.masterObj}/records/${editMId}`, { data });
+      savedData = res?.data || data;
+      toast('Role updated','s');
+    } else {
+      const res = await POST(`/api/v2/objects/${CFG.masterObj}/records`, { data });
+      savedData = res?.data || data;
+      toast('Role created','s');
     }
 
-    const master = records[0];
-    const d = master.data || {};
+    // ── Write audit record for Role_Definition_Changed ──────────────────────
+    // Only on edit (create goes through Role_Assigned / onboarding journey)
+    if (!isNew && CFG.auditObj) {
+      const prev = buildDiff(oldData, data, ['role_name','nerc_cip_standard','revocation_window_hours','physical_revocation_window_hours']);
+      const newV = buildDiff(data, oldData, ['role_name','nerc_cip_standard','revocation_window_hours','physical_revocation_window_hours']);
+      await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, { ...oldData, ...savedData }, {
+        action_taken: 'Modified',
+        previous_value: prev,
+        new_value:      newV,
+        justification:  'Role definition updated via Role Master Manager',
+      }));
+    }
 
-    // Load entitlements in parallel
-    const entEnc = encodeURIComponent(`workday_job_profile_id : '${roleId}'`);
-    const entData = await GET(`/api/v2/objects/${CFG.entObj}/records?page_size=100&query=${entEnc}`);
-    const ents = entData.records || [];
-
-    renderPage(d, master.data.bo_display_id, ents);
-
-    // Show export/print buttons now that we have data
-    document.getElementById('hdrActions').style.display = 'flex';
-
-    // Store for CSV export
-    window._roleData  = d;
-    window._entData   = ents;
-    window._roleId    = roleId;
-
-  } catch (e) {
-    showError('Failed to load role', e.message);
-  }
+    closeM('modM');
+    await loadMasters();
+    if(editMId){
+      const u=allRoles.find(r=>String(r.data.bo_display_id)===String(editMId));
+      if(u) await selectRole(u.data.bo_display_id);
+    }
+  } catch(e){ toast('Save failed: '+e.message,'e'); console.error('[saveMaster] error:', e.message); }
+  finally{ busy('btnMS',false); }
 }
 
-function renderPage(d, recId, ents) {
-  const st  = resolveStatus(d.role_status);
-  const bv  = d.is_bes?.value    || '—';
-  const lc  = d.role_last_changed ? new Date(d.role_last_changed).toLocaleString() : '—';
-
-  const entRows = ents.length
-    ? ents.map(r => {
-        const e = r.data || {};
-        const isBes = (e.entitlement_is_bes?.value || '').toLowerCase() === 'yes';
-        return `<tr>
-          <td class="mono">${cell(e.entitlement_type?.value)}</td>
-          <td class="trunc" title="${e.entitlement_item?.value || ''}">${cell(e.entitlement_item?.value)}</td>
-          <td class="trunc" title="${e.physical_access?.value || ''}">${cell(e.physical_access?.value)}</td>
-          <td class="trunc" title="${e.location?.value || ''}">${cell(e.location?.value)}</td>
-          <td>${badge(e.entitlement_is_bes?.value)}</td>
-          <td class="trunc" style="font-size:11px" title="${e.provisioning_owner?.value || ''}">${shortName(e.provisioning_owner?.value)}</td>
-          <td class="trunc" style="font-size:11px" title="${e.approval_owner?.value || ''}">${shortName(e.approval_owner?.value)}</td>
-          <td class="notes-cell" title="${(e.notes || '').replace(/"/g, '&quot;')}">${cell(e.notes)}</td>
-        </tr>`;
-      }).join('')
-    : `<tr class="lrow"><td colspan="8">No entitlements found for this role</td></tr>`;
-
-  document.getElementById('pageContent').innerHTML = `
-    <div class="role-header">
-      <div class="role-title">
-        <div class="role-id">${d.role_id || '—'}</div>
-        <div class="role-sub">Record ID: ${recId} &nbsp;·&nbsp; Last changed: ${lc}</div>
-      </div>
-      <div class="role-fields">
-        <div class="fg">
-          <span class="fl">Status</span>
-          ${statusBadge(d.role_status)}
-        </div>
-        <div class="fg">
-          <span class="fl">BES</span>
-          ${badge(bv)}
-        </div>
-      </div>
-    </div>
-
-    <div class="sh">
-      <h3>Entitlements</h3>
-      <span class="cb">${ents.length}</span>
-    </div>
-    <div class="tw">
-      <table>
-        <thead><tr>
-          <th>Type</th>
-          <th>Item</th>
-          <th>Physical Access</th>
-          <th>Location</th>
-          <th>BES</th>
-          <th>Prov. Owner</th>
-          <th>Appr. Owner</th>
-          <th>Justification</th>
-        </tr></thead>
-        <tbody>${entRows}</tbody>
-      </table>
-    </div>`;
+// Build a diff string showing changed fields
+function buildDiff(newObj, oldObj, fields) {
+  if (!oldObj) return '';
+  const parts = [];
+  fields.forEach(f => {
+    const nv = newObj[f]; const ov = oldObj[f];
+    if (nv !== undefined && String(nv) !== String(ov || '')) {
+      parts.push(`${f}: "${ov || ''}" → "${nv}"`);
+    }
+  });
+  return parts.join('; ') || 'No tracked field changes';
 }
 
-// ═══════════════════════════════════════════
-//  CSV EXPORT
-// ═══════════════════════════════════════════
-function exportCSV() {
-  const d    = window._roleData  || {};
-  const ents = window._entData   || [];
-  const rid  = window._roleId    || 'role';
-
-  const headers = [
-    'Role ID','Status','BES','Last Changed',
-    'Ent Type','Ent Item','Physical Access','Location',
-    'Ent BES','Prov. Owner','Appr. Owner','Justification'
-  ];
-
-  const lc = d.role_last_changed ? new Date(d.role_last_changed).toLocaleString() : '';
-  const st = resolveStatus(d.role_status);
-  const baseInfo = [
-    csv(d.role_id), csv(st.label), csv(d.is_bes?.value), csv(lc)
-  ];
-
-  let rows;
-  if (ents.length) {
-    rows = ents.map(r => {
-      const e = r.data || {};
-      return [
-        ...baseInfo,
-        csv(e.entitlement_type?.value),
-        csv(e.entitlement_item?.value),
-        csv(e.physical_access?.value),
-        csv(e.location?.value),
-        csv(e.entitlement_is_bes?.value),
-        csv(e.provisioning_owner?.value),
-        csv(e.approval_owner?.value),
-        csv(e.notes),
-      ].join(',');
+function confirmDelMaster() {
+  if(!selRole) return;
+  const rid=selRole.data?.role_id||selRole.data.bo_display_id;
+  confirm_(`Delete Role "${rid}"?`,
+    `Permanently removes this Role Master record.<br><strong>Entitlements are NOT auto-deleted.</strong>`,
+    async()=>{
+      try{
+        await DEL(`/api/v2/objects/${CFG.masterObj}/records/${selRole.data.bo_display_id}`);
+        toast(`Role ${rid} deleted`,'s');
+        selRole=null;
+        document.getElementById('detail').style.display='none';
+        document.getElementById('nosel').style.display='block';
+        await loadMasters();
+      } catch(e){ toast('Delete failed: '+e.message,'e'); }
     });
-  } else {
-    rows = [[...baseInfo, '', '', '', '', '', '', '', ''].join(',')];
+}
+
+async function cloneRole() {
+  if(!selRole) return;
+  if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
+  const d=selRole.data||{};
+  const payload={ data:{
+    is_bes: d.is_bes?.id || CFG.noId,
+  }};
+  console.log('[cloneRole] payload:', JSON.stringify(payload));
+  try{
+    await POST(`/api/v2/objects/${CFG.masterObj}/records`, payload);
+    toast(`Cloned (inactive)`,'s');
+    await loadMasters();
+  } catch(e){ toast('Clone failed: '+e.message,'e'); }
+}
+
+// ═══════════════════════════════════════════
+//  ENTITLEMENTS
+// ═══════════════════════════════════════════
+async function loadEnts(roleId) {
+  const tb=document.getElementById('etb');
+  tb.innerHTML='<tr class="lrow"><td colspan="11"><span class="spn"></span> Loading…</td></tr>';
+  document.getElementById('ecnt').textContent='…';
+  try {
+    const enc=encodeURIComponent(`workday_job_profile_id : '${roleId}'`);
+    const d=await GET(`/api/v2/objects/${CFG.entObj}/records?page_size=100&query=${enc}`);
+    const recs=d.records||[];
+    document.getElementById('ecnt').textContent=recs.length;
+    renderEnts(recs); tb._r=recs;
+  } catch(e){ tb.innerHTML=`<tr class="lrow"><td colspan="11" style="color:#ff6b6b">${e.message}</td></tr>`; toast(e.message,'e'); }
+}
+
+function renderEnts(recs) {
+  const tb=document.getElementById('etb');
+  if(!recs.length){ tb.innerHTML='<tr class="lrow"><td colspan="11">No entitlements for this role</td></tr>'; return; }
+  tb.innerHTML=recs.map(r=>{
+    const d=r.data||{}, bv=d.entitlement_is_bes?.value||'—', isBes=bv.toLowerCase()==='yes';
+    const cipStd=d.entitlement_cip_standard||'';
+    const scope=d.entitlement_system_scope||'';
+    return `<tr>
+      <td class="mono">${d.workday_job_profile_id||'—'}</td>
+      <td>${d.entitlement_type?.value||'—'}</td>
+      <td class="trunc" title="${d.entitlement_item?.value||''}">${d.entitlement_item?.value||'—'}</td>
+      <td class="trunc" title="${d.physical_access?.value||''}">${d.physical_access?.value||'—'}</td>
+      <td class="trunc" title="${d.location?.value||''}">${d.location?.value||'—'}</td>
+      <td><span class="badge ${isBes?'b-yes':'b-no'}">${bv}</span></td>
+      <td class="trunc" style="font-size:10px">${cipStd?`<span class="badge b-cip">${cipStd}</span>`:'—'}</td>
+      <td class="trunc" style="font-size:10px;color:var(--muted)">${scope||'—'}</td>
+      <td class="trunc" style="font-size:11px" title="${d.provisioning_owner?.value||''}">${sName(d.provisioning_owner?.value)}</td>
+      <td class="trunc" style="font-size:11px" title="${d.approval_owner?.value||''}">${sName(d.approval_owner?.value)}</td>
+      <td><div class="ra">
+        <button class="btn bg" title="Edit"   onclick="openEditEnt('${r.data.bo_display_id}')">✎</button>
+        <button class="btn bg" title="Clone"  onclick="cloneEnt('${r.data.bo_display_id}')">⧉</button>
+        <button class="btn bg" title="Delete" style="color:#ff6b6b" onclick="confirmDelEnt('${r.data.bo_display_id}')">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  tb._r=recs;
+}
+
+function openNewEnt() {
+  if(!selRole) return;
+  editEId=null;
+  set('modET','New Entitlement'); set('modES','Role: '+(selRole.data?.role_id||''));
+  document.getElementById('ef_jp').value=selRole.data?.role_id||'';
+  ['ef_tp','ef_bes','ef_item','ef_pa','ef_loc','ef_scope','ef_cats','ef_risk','ef_rfcreq'].forEach(id=>document.getElementById(id).value='');
+  ['ef_notes','ef_cip'].forEach(id=>document.getElementById(id).value='');
+  ['ef_effdt','ef_expdt','ef_appdt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ef_pot').value=''; document.getElementById('ef_poi').value='';
+  document.getElementById('ef_aot').value=''; document.getElementById('ef_aoi').value='';
+  document.getElementById('ef_apbt').value=''; document.getElementById('ef_apbi').value='';
+  // Pre-fill CIP std from role if available
+  const roleCip = selRole.data?.nerc_cip_standard || '';
+  document.getElementById('ef_cip').value = roleCip;
+  show('modE');
+}
+
+function openEditEnt(id) {
+  const rec=(document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(id));
+  if(!rec){ toast('Record not found — refresh and retry','e'); return; }
+  const d=rec.data||{};
+  editEId=rec.data.bo_display_id;
+  set('modET','Edit Entitlement'); set('modES','ID: '+id);
+  document.getElementById('ef_jp').value   =d.workday_job_profile_id||'';
+  document.getElementById('ef_notes').value=d.notes||'';
+  setSel('ef_tp',  d.entitlement_type?.id);
+  setSel('ef_bes', d.entitlement_is_bes?.value ? d.entitlement_is_bes.value.toLowerCase() : '');
+  setSel('ef_item',d.entitlement_item?.id);
+  setSel('ef_pa',  d.physical_access?.id);
+  setSel('ef_loc', d.location?.id);
+  document.getElementById('ef_pot').value=d.provisioning_owner?.value||'';
+  document.getElementById('ef_poi').value=d.provisioning_owner?.id   ||'';
+  document.getElementById('ef_aot').value=d.approval_owner?.value    ||'';
+  document.getElementById('ef_aoi').value=d.approval_owner?.id       ||'';
+  // Compliance fields
+  document.getElementById('ef_cip').value=d.entitlement_cip_standard||'';
+  document.getElementById('ef_scope').value=d.entitlement_system_scope||'';
+  document.getElementById('ef_cats').value=d.requires_cats_web_ticket?.value?(d.requires_cats_web_ticket.value.toLowerCase()):'';
+  document.getElementById('ef_risk').value=d.entitlement_risk_level||'';
+  document.getElementById('ef_rfcreq').value=d.entitlement_rfc_required?.value?(d.entitlement_rfc_required.value.toLowerCase()):'';
+  document.getElementById('ef_effdt').value=d.entitlement_effective_date?d.entitlement_effective_date.slice(0,10):'';
+  document.getElementById('ef_expdt').value=d.entitlement_expiry_date?d.entitlement_expiry_date.slice(0,10):'';
+  // Design-time approval
+  document.getElementById('ef_apbt').value=d.entitlement_approved_by?.value||'';
+  document.getElementById('ef_apbi').value=d.entitlement_approved_by?.id   ||'';
+  document.getElementById('ef_appdt').value=d.entitlement_approval_date?new Date(d.entitlement_approval_date).toISOString().slice(0,16):'';
+  show('modE');
+}
+
+async function cloneEnt(id) {
+  const rec=(document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(id));
+  if(!rec){ toast('Record not found','e'); return; }
+  const p=buildEP(rec.data||{}); p.data.notes=(rec.data?.notes||'')+' [CLONE]';
+  try{ await POST(`/api/v2/objects/${CFG.entObj}/records`,p); toast('Entitlement cloned','s'); await loadEnts(selRole.data.role_id); }
+  catch(e){ toast('Clone failed: '+e.message,'e'); }
+}
+
+async function saveEnt() {
+  const isNew = !editEId;
+
+  const jp    = document.getElementById('ef_jp').value.trim();
+  const notes = document.getElementById('ef_notes').value.trim();
+  const besVal= document.getElementById('ef_bes').value;
+  const tpId  = document.getElementById('ef_tp').value;
+  const poId  = document.getElementById('ef_poi').value;
+  const aoId  = document.getElementById('ef_aoi').value;
+
+  if(!jp)    { toast('Job Profile ID is required','e'); return; }
+  if(!notes) { toast('Entitlement Justification is required','e'); return; }
+  if(!besVal){ toast('BES Entitlement is required','e'); return; }
+  if(!tpId)  { toast('Entitlement Type is required','e'); return; }
+  if(!poId)  { toast('Provisioning Owner required — select from dropdown','e'); return; }
+  if(!aoId)  { toast('Approval Owner required — select from dropdown','e'); return; }
+  if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
+
+  const itemId = document.getElementById('ef_item').value;
+  const paId   = document.getElementById('ef_pa').value;
+  const locId  = document.getElementById('ef_loc').value;
+
+  // Compliance fields
+  const cipStd  = document.getElementById('ef_cip').value.trim();
+  const scopeV  = document.getElementById('ef_scope').value;
+  const catsV   = document.getElementById('ef_cats').value;
+  const riskV   = document.getElementById('ef_risk').value;
+  const rfcreqV = document.getElementById('ef_rfcreq').value;
+  const effdt   = document.getElementById('ef_effdt').value;
+  const expdt   = document.getElementById('ef_expdt').value;
+
+  // Design-time approval
+  const apbId   = document.getElementById('ef_apbi').value;
+  const appdtV  = document.getElementById('ef_appdt').value;
+
+  // Snapshot old data for audit diff
+  const oldRec = editEId ? ((document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(editEId))) : null;
+  const oldData = oldRec?.data || {};
+
+  const payload = { data: {
+    workday_job_profile_id: jp,
+    notes,
+    entitlement_type:   isNew ? parseInt(tpId)  : { id: parseInt(tpId) },
+    entitlement_is_bes: isNew ? ynId(besVal)    : { id: ynId(besVal) },
+    provisioning_owner: isNew ? parseInt(poId)  : { id: parseInt(poId) },
+    approval_owner:     isNew ? parseInt(aoId)  : { id: parseInt(aoId) },
+    ...(itemId ? { entitlement_item: isNew ? parseInt(itemId) : { id: parseInt(itemId) } } : {}),
+  }};
+
+  // Optional lookup fields with null strategy
+  applyOptional(payload.data, 'physical_access', optionalLookup(paId,  isNew));
+  applyOptional(payload.data, 'location',        optionalLookup(locId, isNew));
+
+  // ── POC FIELD GATES ────────────────────────────────────────────────────────
+  // Set a flag to true once the corresponding field is created in the
+  // Freshservice custom object builder. Until then the field is collected
+  // in the UI but never sent to the API, preventing 400 errors.
+  const FS_FIELDS = {
+    entitlement_cip_standard:    true,   // Text   — create first, then enable
+    entitlement_system_scope:    false,  // Lookup → System Scope master
+    entitlement_risk_level:      false,  // Lookup → Risk Level master
+    entitlement_effective_date:  false,  // Date
+    entitlement_expiry_date:     false,  // Date
+    entitlement_approval_date:   false,  // Date-Time
+    requires_cats_web_ticket:    false,  // Lookup → Yes/No
+    entitlement_rfc_required:    false,  // Lookup → Yes/No
+    entitlement_approved_by:     false,  // Lookup → All Agents
+  };
+
+  if (FS_FIELDS.entitlement_cip_standard   && cipStd)  payload.data.entitlement_cip_standard  = cipStd;
+  if (FS_FIELDS.entitlement_system_scope   && scopeV)  payload.data.entitlement_system_scope  = scopeV;
+  if (FS_FIELDS.entitlement_risk_level     && riskV)   payload.data.entitlement_risk_level    = riskV;
+  if (FS_FIELDS.entitlement_effective_date && effdt)   payload.data.entitlement_effective_date = effdt;
+  if (FS_FIELDS.entitlement_expiry_date    && expdt)   payload.data.entitlement_expiry_date   = expdt;
+  if (FS_FIELDS.entitlement_approval_date  && appdtV)  payload.data.entitlement_approval_date = new Date(appdtV).toISOString();
+  if (FS_FIELDS.requires_cats_web_ticket)  applyYesNoOpt(payload.data, 'requires_cats_web_ticket', catsV, isNew);
+  if (FS_FIELDS.entitlement_rfc_required)  applyYesNoOpt(payload.data, 'entitlement_rfc_required', rfcreqV, isNew);
+  if (FS_FIELDS.entitlement_approved_by && apbId) {
+    payload.data.entitlement_approved_by = isNew ? parseInt(apbId) : { id: parseInt(apbId) };
   }
+  // ───────────────────────────────────────────────────────────────────────────
 
-  const content = [headers.join(','), ...rows].join('\r\n');
-  const blob = new Blob([content], { type: 'text/csv' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = `role_${rid}_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  console.log('[saveEnt] nullStrategy='+getNullStrategy()+' paId='+paId+' locId='+locId);
+  console.log('[saveEnt] payload:', JSON.stringify(payload));
+
+  busy('btnES',true);
+  try {
+    let savedData;
+    if(editEId){
+      const res = await PUT(`/api/v2/objects/${CFG.entObj}/records/${editEId}`, payload);
+      savedData = res?.data || payload.data;
+      toast('Entitlement updated','s');
+    } else {
+      const res = await POST(`/api/v2/objects/${CFG.entObj}/records`, payload);
+      savedData = res?.data || payload.data;
+      toast('Entitlement created','s');
+    }
+
+    // ── Write audit records ──────────────────────────────────────────────────
+    if (CFG.auditObj) {
+      const isBesRole = (selRole?.data?.is_bes?.value || '').toLowerCase() === 'yes';
+      const roleId    = selRole?.data?.role_id || jp;
+
+      if (isNew) {
+        // Entitlement_Added
+        await writeAudit(buildEntAudit(EVT.ENT_ADDED, savedData, roleId, isBesRole, {
+          action_taken: 'Granted',
+          new_value:    describeEnt(savedData),
+        }));
+        // Role_Definition_Changed (role structure modified)
+        await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
+          action_taken:  'Modified',
+          previous_value: 'Entitlement added',
+          new_value:      describeEnt(savedData),
+          justification: notes,
+        }));
+      } else {
+        // Entitlement_Removed (old) + Entitlement_Added (new) — treated as modification
+        await writeAudit(buildEntAudit(EVT.ENT_ADDED, savedData, roleId, isBesRole, {
+          action_taken:  'Modified',
+          previous_value: describeEnt(oldData),
+          new_value:      describeEnt(savedData),
+        }));
+        await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
+          action_taken:  'Modified',
+          previous_value: describeEnt(oldData),
+          new_value:      describeEnt(savedData),
+          justification: notes,
+        }));
+      }
+    }
+
+    closeM('modE');
+    await loadEnts(selRole.data.role_id);
+  } catch(e){ toast('Save failed: '+e.message,'e'); console.error('[saveEnt] error:', e.message); }
+  finally{ busy('btnES',false); }
 }
 
-function csv(v) {
-  if (v == null || v === '') return '';
-  return '"' + String(v).replace(/"/g, '""') + '"';
+function confirmDelEnt(id) {
+  const rec=(document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(id));
+  const desc = rec ? describeEnt(rec.data||{}) : id;
+  confirm_('Delete Entitlement?',`Permanently removes this entitlement. Cannot be undone.<br><em style="font-size:11px;color:var(--muted)">${desc}</em>`,
+    async()=>{
+      try{
+        // Capture data before delete for audit
+        const oldData = rec?.data || {};
+        const isBesRole = (selRole?.data?.is_bes?.value || '').toLowerCase() === 'yes';
+        const roleId = selRole?.data?.role_id || '';
+
+        await DEL(`/api/v2/objects/${CFG.entObj}/records/${id}`);
+        toast('Deleted','s');
+
+        // Write Entitlement_Removed audit record
+        if (CFG.auditObj) {
+          await writeAudit(buildEntAudit(EVT.ENT_REMOVED, oldData, roleId, isBesRole, {
+            action_taken:   'Revoked',
+            previous_value: describeEnt(oldData),
+            new_value:      'Entitlement removed',
+          }));
+          await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
+            action_taken:   'Modified',
+            previous_value: describeEnt(oldData),
+            new_value:      'Entitlement removed',
+            justification:  'Entitlement deleted via Role Master Manager',
+          }));
+        }
+
+        await loadEnts(selRole.data.role_id);
+      } catch(e){ toast('Delete failed: '+e.message,'e'); }
+    });
 }
+
+function buildEP(d) {
+  return { data:{
+    workday_job_profile_id: d.workday_job_profile_id||'',
+    notes: d.notes||'',
+    ...(d.entitlement_type?.id    ? { entitlement_type:   { id: d.entitlement_type.id   } } : {}),
+    ...(d.entitlement_is_bes?.id  ? { entitlement_is_bes: { id: d.entitlement_is_bes.id } } : {}),
+    ...(d.provisioning_owner?.id  ? { provisioning_owner: { id: d.provisioning_owner.id } } : {}),
+    ...(d.approval_owner?.id      ? { approval_owner:     { id: d.approval_owner.id     } } : {}),
+    ...(d.entitlement_item?.id    ? { entitlement_item:   { id: d.entitlement_item.id   } } : {}),
+    ...(d.physical_access?.id     ? { physical_access:    { id: d.physical_access.id    } } : {}),
+    ...(d.location?.id            ? { location:           { id: d.location.id           } } : {}),
+    ...(d.entitlement_cip_standard? { entitlement_cip_standard: d.entitlement_cip_standard } : {}),
+    ...(d.entitlement_system_scope? { entitlement_system_scope: d.entitlement_system_scope } : {}),
+    ...(d.entitlement_risk_level  ? { entitlement_risk_level:   d.entitlement_risk_level   } : {}),
+  }};
+}
+
+// ═══════════════════════════════════════════
+//  USER AUTOCOMPLETE
+// ═══════════════════════════════════════════
+function filterU(tId,hId,dId) {
+  const q=document.getElementById(tId).value.toLowerCase().trim(), dd=document.getElementById(dId);
+  if(!q){ dd.style.display='none'; document.getElementById(hId).value=''; return; }
+  const m=allUsers.filter(u=>u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)).slice(0,8);
+  if(!m.length){ dd.style.display='none'; return; }
+  dd.innerHTML=m.map(u=>`<div class="udi" onmousedown="pickU('${tId}','${hId}','${dId}',${u.id},'${esc(u.name)}','${u.email}')"><div>${u.name}</div><div class="ue">${u.email}</div></div>`).join('');
+  dd.style.display='block';
+}
+function pickU(tId,hId,dId,id,name,email){
+  document.getElementById(tId).value=`${name} <${email}>`; document.getElementById(hId).value=id; document.getElementById(dId).style.display='none';
+}
+document.addEventListener('click',e=>{
+  ['ef_pod','ef_aod','ef_apbd'].forEach(id=>{ const dd=document.getElementById(id); if(dd&&!dd.contains(e.target)) dd.style.display='none'; });
+});
+
+// ═══════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════
+const show    = id => document.getElementById(id).style.display='flex';
+const closeM  = id => document.getElementById(id).style.display='none';
+const set     = (id,v) => document.getElementById(id).textContent=v;
+const setSel  = (id,v) => { if(v!=null) document.getElementById(id).value=String(v); };
+const sName   = v => { if(!v) return '—'; const m=v.match(/^(.+?)\s*</); return m?m[1]:v; };
+const esc     = s => (s||'').replace(/'/g,"\\'");
+const nowLocal= () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16); };
+
+function busy(id,b){ const el=document.getElementById(id); if(!el) return; el.disabled=b; if(b){el._t=el.innerHTML;el.innerHTML='<span class="spn"></span> Saving…';}else{el.innerHTML=el._t||'Save';} }
+
+function confirm_(title,msg,cb){
+  set('cfT',title); document.getElementById('cfMsg').innerHTML=msg;
+  document.getElementById('cfOk').onclick=async()=>{ closeM('modC'); await cb(); };
+  show('modC');
+}
+
+function toast(msg,type='i'){
+  const c=document.getElementById('tc'), e=document.createElement('div');
+  e.className=`toast t-${type}`; e.textContent=msg; c.appendChild(e); setTimeout(()=>e.remove(),4000);
+}
+
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.style.display='none'; }));
 
 // ═══════════════════════════════════════════
 //  BOOT
 // ═══════════════════════════════════════════
-init();
+if(typeof app !== 'undefined' && typeof app.initialized === 'function'){
+  app.initialized().then(()=>init());
+} else {
+  init();
+}
+
 function toggleTheme() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   const next = isLight ? 'dark' : 'light';
@@ -390,13 +1484,13 @@ function toggleTheme() {
   document.getElementById('themeBtn').textContent = next === 'light' ? '☾' : '☀';
   localStorage.setItem('velco-theme', next);
 }
-// Apply saved preference on load
 (function() {
   const saved = localStorage.getItem('velco-theme');
   if (saved === 'light') {
     document.documentElement.setAttribute('data-theme', 'light');
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('themeBtn').textContent = '☾';
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = '☾';
     });
   }
 })();
