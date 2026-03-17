@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Compliance Audit Trail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0f1117;--surface:#171c26;--surface2:#1e2535;--border:#2a3245;
+      --accent:#4f8ef7;--accent2:#38d9a9;--danger:#ff6b6b;--warn:#ffa94d;
+      --text:#e8ecf4;--muted:#7a8aaa;
+      --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+      --r:6px;--t:150ms ease;
+    }
+    [data-theme="light"] {
+      --bg:#f0f2f7;--surface:#ffffff;--surface2:#e8ebf2;--border:#d0d6e8;
+      --text:#1a2035;--muted:#6272a4;--accent:#2563eb;--accent2:#059669;
+      --danger:#dc2626;--warn:#d97706;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+
+    /* ── HEADER ── */
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:100}
+    .logo{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:2px;text-transform:uppercase;border:1px solid var(--accent);padding:3px 8px;border-radius:3px}
+    header h1{font-size:14px;font-weight:500}
+    .sp1{flex:1}
+    .env{font-family:var(--mono);font-size:10px;color:var(--warn);border:1px solid var(--warn);padding:2px 7px;border-radius:3px}
+    .hbadge{font-family:var(--mono);font-size:10px;color:var(--accent2);border:1px solid rgba(56,217,169,.3);padding:2px 7px;border-radius:3px}
+
+    /* ── PAGE ── */
+    .page{max-width:1400px;margin:0 auto;padding:28px 24px 64px}
+
+    /* ── QUERY PANEL ── */
+    .qpanel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:20px}
+    .qpanel-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px}
+    .qrow{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+    .qf{display:flex;flex-direction:column;gap:5px;min-width:200px}
+    .qf label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+    .qf select,.qf input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color var(--t);width:100%}
+    .qf select:focus,.qf input:focus{border-color:var(--accent)}
+    .qf select option{background:var(--surface2)}
+    .qf input::placeholder{color:var(--muted)}
+    .qf-wide{min-width:260px}
+
+    /* ── BUTTONS ── */
+    .btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;transition:opacity var(--t),transform var(--t);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+    .btn:hover:not(:disabled){opacity:.82;transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .bp{background:var(--accent);color:#fff}
+    .bs{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+    .bg2{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:11px;padding:5px 10px}
+    .bg2:hover{color:var(--text);opacity:1!important;transform:none!important}
+
+    /* ── RESULTS HEADER ── */
+    .rh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .rh-title{font-size:12px;font-weight:600;color:var(--text)}
+    .rcnt{background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);padding:2px 8px;border-radius:10px}
+    .act-row{display:flex;gap:8px;margin-left:auto}
+
+    /* ── TABLE ── */
+    .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    thead th{background:var(--surface2);padding:9px 12px;text-align:left;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:52px;z-index:10}
+    thead th.srt{cursor:pointer;user-select:none}
+    thead th.srt:hover{color:var(--text)}
+    tbody tr.main-row{border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--t)}
+    tbody tr.main-row:hover{background:rgba(79,142,247,.05)}
+    tbody tr.main-row.expanded{background:rgba(79,142,247,.07);border-bottom:none}
+    tbody tr.detail-row{border-bottom:1px solid var(--border)}
+    tbody tr.detail-row td{padding:0}
+    .detail-inner{padding:14px 20px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;background:rgba(79,142,247,.03);border-top:1px solid rgba(79,142,247,.15)}
+    .detail-section{grid-column:1/-1;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--border);margin-top:6px;margin-bottom:2px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+    .detail-section:first-child{margin-top:0}
+    .df{display:flex;flex-direction:column;gap:3px}
+    .dl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+    .dv{font-family:var(--mono);font-size:11px;word-break:break-word}
+    .dv-na{font-family:var(--mono);font-size:11px;color:var(--border)}
+    td{padding:9px 12px;vertical-align:middle}
+    td.mono{font-family:var(--mono);font-size:11px}
+    .trunc{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .expand-icon{font-size:10px;color:var(--muted);margin-right:6px;transition:transform var(--t);display:inline-block}
+    .expanded .expand-icon{transform:rotate(90deg)}
+
+    /* ── BADGES ── */
+    .badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.4px;white-space:nowrap;display:inline-block}
+    .b-yes{background:rgba(255,107,107,.15);color:#ff6b6b;border:1px solid rgba(255,107,107,.3)}
+    .b-no{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
+    .b-cip{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.2);font-size:9px}
+    .b-domain{font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap}
+    .bd-rolemgmt{background:rgba(79,142,247,.12);color:var(--accent);border:1px solid rgba(79,142,247,.25)}
+    .bd-onboarding{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
+    .bd-offboarding{background:rgba(255,107,107,.12);color:#ff6b6b;border:1px solid rgba(255,107,107,.25)}
+    .bd-transfer{background:rgba(255,169,77,.12);color:var(--warn);border:1px solid rgba(255,169,77,.25)}
+    .bd-exception{background:rgba(122,138,170,.12);color:var(--muted);border:1px solid var(--border)}
+    .sla-met{color:#38d9a9}
+    .sla-miss{color:#ff6b6b}
+    .sla-na{color:var(--muted)}
+
+    /* ── EMPTY / LOADING / ERROR ── */
+    .state-msg{text-align:center;padding:56px 20px;color:var(--muted)}
+    .state-msg .ico{font-size:32px;opacity:.3;margin-bottom:10px}
+    .state-msg p{font-size:12px;font-family:var(--mono)}
+    .state-msg.err p{color:var(--danger)}
+
+    /* ── SPINNER ── */
+    .spn{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── PRINT ── */
+    @media print {
+      header,#querySection,.act-row,.expand-icon{display:none!important}
+      body{background:#fff;color:#000;font-size:11px}
+      .tw{border:1px solid #ccc}
+      tbody tr.main-row{page-break-inside:avoid}
+      .detail-inner{background:#f9f9f9;border-top:1px solid #ddd}
+      tbody tr.detail-row{display:table-row!important}
+      .badge,.b-cip,.b-domain{border:1px solid #999;color:#000;background:none}
+      .page{padding:0}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span class="logo">VELCO</span>
+    <h1>Compliance Audit Trail</h1>
+    <span class="hbadge">READ-ONLY</span>
+    <div class="sp1"></div>
+    <button class="btn bs" id="themeBtn" onclick="toggleTheme()" style="padding:5px 9px;font-size:13px">☀</button>
+    <span class="env">DEV / BETA</span>
+  </header>
+
+  <div class="page">
+
+    <!-- QUERY PANEL -->
+    <div class="qpanel" id="querySection">
+      <div class="qpanel-title">🔍 Query Parameters</div>
+      <div class="qrow">
+        <div class="qf">
+          <label>Event Domain</label>
+          <select id="q_domain" onchange="onDomainChange()">
+            <option value="">— All domains —</option>
+            <option value="role_mgmt">Role Mgmt</option>
+            <option value="onboarding">Onboarding</option>
+            <option value="offboarding">Offboarding</option>
+            <option value="transfer">Transfer</option>
+            <option value="exception">Exception</option>
+          </select>
+        </div>
+        <div class="qf" id="qf_eventtype_wrap">
+          <label>Event Type</label>
+          <select id="q_eventtype">
+            <option value="">— All event types —</option>
+          </select>
+        </div>
+        <div class="qf qf-wide" id="qf_ctx_wrap" style="display:none">
+          <label id="q_ctx_label">Context ID</label>
+          <input type="text" id="q_ctx" placeholder="Enter value…"/>
+        </div>
+        <div class="qf">
+          <label>Date From</label>
+          <input type="date" id="q_from"/>
+        </div>
+        <div class="qf">
+          <label>Date To</label>
+          <input type="date" id="q_to"/>
+        </div>
+        <div style="padding-bottom:1px">
+          <button class="btn bp" id="btnSearch" onclick="runQuery()">Search</button>
+        </div>
+        <div style="padding-bottom:1px">
+          <button class="btn bs" onclick="clearQuery()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="resultsWrap" style="display:none">
+      <div class="rh">
+        <span class="rh-title">Results</span>
+        <span class="rcnt" id="rcnt">0 records</span>
+        <div class="act-row">
+          <button class="btn bg2" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn bg2" onclick="window.print()">⎙ Print</button>
+          <button class="btn bg2" onclick="expandAll()">⊞ Expand All</button>
+          <button class="btn bg2" onclick="collapseAll()">⊟ Collapse All</button>
+        </div>
+      </div>
+      <div class="tw">
+        <table id="resultsTable">
+          <thead>
+            <tr>
+              <th style="width:28px"></th>
+              <th class="srt" onclick="sortBy('event_timestamp')">Timestamp <span id="sort_event_timestamp"></span></th>
+              <th class="srt" onclick="sortBy('event_type_label')">Event Type <span id="sort_event_type_label"></span></th>
+              <th>Domain</th>
+              <th class="srt" onclick="sortBy('role_id')">Role ID <span id="sort_role_id"></span></th>
+              <th>Employee</th>
+              <th>BES</th>
+              <th>Action</th>
+              <th>SLA Met</th>
+              <th>Source Ticket</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INITIAL STATE -->
+    <div class="state-msg" id="stateMsg">
+      <div class="ico">⬡</div>
+      <p>Select a domain and run a query</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  CONFIG  — swap AUDIT_OBJ_ID once the FS object is created
+// ══════════════════════════════════════════════════════════════════
+const CFG = {
+  domain:     'velco-betabox.freshservice.com',
+  apiKey:     'uloskM4yZXvLPVUdOxyD',
+  auditObjId: 37000019275,   // ← SET THIS: e.g. 37000019xxx
+};
+
+const BASE = 'https://' + CFG.domain;
+const HDR  = { Authorization: 'Basic ' + btoa(CFG.apiKey + ':X'), 'Content-Type': 'application/json' };
+const GET  = async p => { const r = await fetch(BASE+p, {headers:HDR}); if(!r.ok) throw new Error(`GET ${p} → ${r.status}`); return r.json(); };
+
+// ══════════════════════════════════════════════════════════════════
+//  EVENT TYPE VOCABULARY
+//  Structure: domain → [ { value, label, cipStd } ]
+//  'value' must match what's stored in the event_type lookup field
+// ══════════════════════════════════════════════════════════════════
+const EVENT_VOCAB = {
+  role_mgmt: [
+    { value: 'Role_Definition_Changed',   label: 'Role Definition Changed',   cipStd: 'CIP-004-7'     },
+    { value: 'Entitlement_Added',         label: 'Entitlement Added',         cipStd: 'CIP-004-7'     },
+    { value: 'Entitlement_Removed',       label: 'Entitlement Removed',       cipStd: 'CIP-004-7'     },
+    { value: 'Role_Reviewed_Recertified', label: 'Role Reviewed / Recertified', cipStd: 'CIP-004-7'   },
+    { value: 'Role_Deactivated',          label: 'Role Deactivated',          cipStd: 'Internal'      },
+  ],
+  onboarding: [
+    { value: 'Role_Assigned',                label: 'Role Assigned',               cipStd: 'CIP-004-7 R4' },
+    { value: 'Authorization_Record_Created', label: 'Authorization Record Created', cipStd: 'CIP-004-7 R4' },
+    { value: 'Training_Completed',           label: 'Training Completed',           cipStd: 'CIP-004-7 R3' },
+    { value: 'Background_Check_Cleared',     label: 'Background Check Cleared',     cipStd: 'CIP-004-7 R3' },
+    { value: 'BES_Access_Granted',           label: 'BES Access Granted',           cipStd: 'CIP-004-7 R4' },
+    { value: 'BCSI_Access_Granted',          label: 'BCSI Access Granted',          cipStd: 'CIP-011-3 R2' },
+    { value: 'Physical_Access_Granted',      label: 'Physical Access Granted',      cipStd: 'CIP-006'      },
+    { value: 'TCA_Device_Provisioned',       label: 'TCA Device Provisioned',       cipStd: 'CIP-004/007'  },
+  ],
+  offboarding: [
+    { value: 'Revoke_All_Initiated',         label: 'Revoke All Initiated',         cipStd: 'CIP-004-7 R5', sla: '24h'     },
+    { value: 'EMS_AD_Disabled',              label: 'EMS AD Disabled',              cipStd: 'CIP-004-7 R5', sla: '24h'     },
+    { value: 'Corporate_AD_Disabled',        label: 'Corporate AD Disabled',        cipStd: 'Internal'                     },
+    { value: 'BCSI_Access_Revoked',          label: 'BCSI Access Revoked',          cipStd: 'CIP-011-3 R2', sla: '24-48h'  },
+    { value: 'Physical_Badge_Disabled',      label: 'Physical Badge Disabled',      cipStd: 'CIP-006',      sla: '24h'     },
+    { value: 'AssurX_Disassociated',         label: 'AssurX Disassociated',         cipStd: 'Internal'                     },
+    { value: 'Shared_Acct_Password_Rotated', label: 'Shared Acct Password Rotated', cipStd: 'CIP-007-6 R5', sla: '30 days' },
+    { value: 'TCA_Device_Offboarded',        label: 'TCA Device Offboarded',        cipStd: 'CIP-007/004'                  },
+    { value: 'Compliance_Verified',          label: 'Compliance Verified',          cipStd: 'CIP-004-7 R5'                 },
+    { value: 'Evidence_Package_Compiled',    label: 'Evidence Package Compiled',    cipStd: 'Internal',     sla: '72h'     },
+  ],
+  transfer: [
+    { value: 'Department_Transfer',   label: 'Department Transfer',    cipStd: 'CIP-004-7 R5' },
+    { value: 'BES_Reclassification',  label: 'BES Reclassification',   cipStd: 'CIP-004-7'    },
+  ],
+  exception: [
+    { value: 'Emergency_Access_Granted', label: 'Emergency Access Granted', cipStd: 'CIP-004-7' },
+    { value: 'Exception_Documented',     label: 'Exception Documented',     cipStd: 'CIP-004-7' },
+  ],
+};
+
+// Context field config per domain: { label, fieldKey }
+// fieldKey must match the API field name in the audit trail object
+const CTX_CONFIG = {
+  role_mgmt:   { label: 'Role ID',      fieldKey: 'role_id'     },
+  onboarding:  { label: 'Employee ID',  fieldKey: 'employee_id' },
+  offboarding: { label: 'Employee ID',  fieldKey: 'employee_id' },
+  transfer:    { label: 'Employee ID',  fieldKey: 'employee_id' },
+  exception:   { label: 'Employee ID',  fieldKey: 'employee_id' },
+};
+
+const DOMAIN_LABEL = {
+  role_mgmt:   'Role Mgmt',
+  onboarding:  'Onboarding',
+  offboarding: 'Offboarding',
+  transfer:    'Transfer',
+  exception:   'Exception',
+};
+
+const DOMAIN_CLS = {
+  role_mgmt:   'bd-rolemgmt',
+  onboarding:  'bd-onboarding',
+  offboarding: 'bd-offboarding',
+  transfer:    'bd-transfer',
+  exception:   'bd-exception',
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════
+let allResults = [];
+let sortField  = 'event_timestamp';
+let sortDir    = 'desc';   // 'asc' | 'desc'
+let expandedRows = new Set();
+
+// ══════════════════════════════════════════════════════════════════
+//  DOMAIN → EVENT TYPE DROPDOWN
+// ══════════════════════════════════════════════════════════════════
+function onDomainChange() {
+  const domain = document.getElementById('q_domain').value;
+  const etSel  = document.getElementById('q_eventtype');
+  const ctxWrap = document.getElementById('qf_ctx_wrap');
+
+  // Rebuild event type options
+  etSel.innerHTML = '<option value="">— All event types —</option>';
+  if (domain && EVENT_VOCAB[domain]) {
+    EVENT_VOCAB[domain].forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.value; o.textContent = e.label;
+      etSel.appendChild(o);
+    });
+  } else {
+    // Add all events across all domains
+    Object.values(EVENT_VOCAB).flat().forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.value; o.textContent = e.label;
+      etSel.appendChild(o);
+    });
+  }
+
+  // Show/hide context field
+  if (domain && CTX_CONFIG[domain]) {
+    document.getElementById('q_ctx_label').textContent = CTX_CONFIG[domain].label;
+    document.getElementById('q_ctx').placeholder = `Enter ${CTX_CONFIG[domain].label}…`;
+    ctxWrap.style.display = '';
+  } else {
+    ctxWrap.style.display = 'none';
+    document.getElementById('q_ctx').value = '';
+  }
+}
+
+function clearQuery() {
+  document.getElementById('q_domain').value    = '';
+  document.getElementById('q_eventtype').value = '';
+  document.getElementById('q_ctx').value       = '';
+  document.getElementById('q_from').value      = '';
+  document.getElementById('q_to').value        = '';
+  onDomainChange();
+  document.getElementById('resultsWrap').style.display = 'none';
+  document.getElementById('stateMsg').style.display    = '';
+  document.getElementById('stateMsg').className        = 'state-msg';
+  document.getElementById('stateMsg').innerHTML        = '<div class="ico">⬡</div><p>Select a domain and run a query</p>';
+  allResults = [];
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  QUERY
+// ══════════════════════════════════════════════════════════════════
+async function runQuery() {
+  if (!CFG.auditObjId) {
+    showState('⚠ AUDIT_OBJ_ID not set — update CFG.auditObjId in the script before querying.', true);
+    return;
+  }
+
+  const domain    = document.getElementById('q_domain').value;
+  const eventType = document.getElementById('q_eventtype').value;
+  const ctxVal    = document.getElementById('q_ctx').value.trim();
+  const fromDate  = document.getElementById('q_from').value;
+  const toDate    = document.getElementById('q_to').value;
+
+  // Build query string
+  const conditions = [];
+
+  if (eventType) {
+    conditions.push(`event_type : '${eventType}'`);
+  } else if (domain) {
+    // Query all event types for this domain using OR
+    const types = EVENT_VOCAB[domain] || [];
+    if (types.length) {
+      const orParts = types.map(t => `event_type : '${t.value}'`).join(' OR ');
+      conditions.push(`(${orParts})`);
+    }
+  }
+
+  if (ctxVal && domain && CTX_CONFIG[domain]) {
+    conditions.push(`${CTX_CONFIG[domain].fieldKey} : '${ctxVal}'`);
+  }
+
+  if (fromDate) conditions.push(`event_timestamp : >='${fromDate}T00:00:00Z'`);
+  if (toDate)   conditions.push(`event_timestamp : <='${toDate}T23:59:59Z'`);
+
+  const queryStr = conditions.length ? `&query=${encodeURIComponent(conditions.join(' AND '))}` : '';
+
+  busy('btnSearch', true);
+  showState('<span class="spn"></span> Querying audit trail…', false, true);
+  document.getElementById('resultsWrap').style.display = 'none';
+
+  try {
+    // Paginate — fetch up to 500 records (5 pages of 100)
+    let allRecs = [];
+    let page = 1;
+    while (page <= 5) {
+      const url = `/api/v2/objects/${CFG.auditObjId}/records?page_size=100&page=${page}${queryStr}`;
+      const d = await GET(url);
+      const recs = d.records || [];
+      allRecs = allRecs.concat(recs);
+      if (recs.length < 100) break;
+      page++;
+    }
+
+    allResults = allRecs.map(r => flattenRecord(r));
+    sortResults();
+    renderResults();
+  } catch(e) {
+    showState('Query failed: ' + e.message, true);
+    console.error('[AuditQuery]', e);
+  } finally {
+    busy('btnSearch', false);
+  }
+}
+
+// Flatten API record into a display-friendly object
+function flattenRecord(r) {
+  const d = r.data || {};
+  // Resolve event type label from vocabulary
+  const etVal = d.event_type?.value || d.event_type || '';
+  const etInfo = Object.values(EVENT_VOCAB).flat().find(e => e.value === etVal) || { label: etVal, cipStd: '' };
+  const domain = domainForEvent(etVal);
+
+  return {
+    _id:                   r.data?.bo_display_id,
+    event_timestamp:       d.event_timestamp || '',
+    event_type_raw:        etVal,
+    event_type_label:      etInfo.label || etVal,
+    event_domain:          domain,
+    event_source_system:   d.event_source_system?.value || d.event_source_system || '',
+    source_ticket_id:      d.source_ticket_id || '',
+    role_id:               d.role_id || '',
+    role_name_snapshot:    d.role_name_snapshot || '',
+    employee_id:           d.employee_id || '',
+    employee_name:         d.employee_name || '',
+    worker_type:           d.worker_type?.value || d.worker_type || '',
+    bes_user_flag:         d.bes_user_flag?.value || d.bes_user_flag || '',
+    department:            d.department || '',
+    cip_standard:          d.cip_standard_reference || etInfo.cipStd || '',
+    sla_window_hours:      d.sla_window_hours != null ? d.sla_window_hours : '',
+    sla_clock_start:       d.sla_clock_start || '',
+    sla_clock_end:         d.sla_clock_end || '',
+    sla_completed_at:      d.sla_completed_at || '',
+    sla_met:               d.sla_met?.value || d.sla_met || '',
+    action_taken:          d.action_taken?.value || d.action_taken || '',
+    system_affected:       d.system_affected || '',
+    previous_value:        d.previous_value || '',
+    new_value:             d.new_value || '',
+    justification:         d.justification || '',
+    authorization_approver: d.authorization_approver?.value || '',
+    authorization_date:    d.authorization_date || '',
+    rfc_number:            d.rfc_number || '',
+    badge_disabled_at:     d.badge_disabled_at || '',
+    tca_device_id:         d.tca_device_id || '',
+    compliance_evidence_url: d.compliance_evidence_url || '',
+    created_by_agent_id:   d.created_by_agent_id?.value || '',
+  };
+}
+
+function domainForEvent(etVal) {
+  for (const [dom, events] of Object.entries(EVENT_VOCAB)) {
+    if (events.find(e => e.value === etVal)) return dom;
+  }
+  return '';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SORT
+// ══════════════════════════════════════════════════════════════════
+function sortBy(field) {
+  if (sortField === field) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField = field;
+    sortDir = field === 'event_timestamp' ? 'desc' : 'asc';
+  }
+  // Update sort indicators
+  document.querySelectorAll('[id^="sort_"]').forEach(el => el.textContent = '');
+  const ind = document.getElementById('sort_' + field);
+  if (ind) ind.textContent = sortDir === 'asc' ? ' ↑' : ' ↓';
+  sortResults();
+  renderResults();
+}
+
+function sortResults() {
+  allResults.sort((a, b) => {
+    const av = a[sortField] || '', bv = b[sortField] || '';
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+  // Set default indicator
+  const ind = document.getElementById('sort_' + sortField);
+  if (ind) ind.textContent = sortDir === 'asc' ? ' ↑' : ' ↓';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════════════
+function renderResults() {
+  document.getElementById('stateMsg').style.display = 'none';
+  const wrap = document.getElementById('resultsWrap');
+  wrap.style.display = '';
+  document.getElementById('rcnt').textContent = `${allResults.length} record${allResults.length !== 1 ? 's' : ''}`;
+  expandedRows.clear();
+
+  const tbody = document.getElementById('resultsTbody');
+  if (!allResults.length) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--muted);font-family:var(--mono);font-size:11px">No records match your query</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = allResults.map((rec, i) => renderRow(rec, i)).join('');
+}
+
+function renderRow(rec, i) {
+  const ts     = rec.event_timestamp ? fmtDateTime(rec.event_timestamp) : '—';
+  const domain = rec.event_domain;
+  const domCls = DOMAIN_CLS[domain] || 'bd-exception';
+  const domLbl = DOMAIN_LABEL[domain] || domain || '—';
+  const bes    = (rec.bes_user_flag || '').toLowerCase();
+  const sla    = (rec.sla_met || '').toLowerCase();
+  const slaEl  = sla === 'yes' ? `<span class="sla-met">✓ Yes</span>`
+               : sla === 'no'  ? `<span class="sla-miss">✗ No</span>`
+               : `<span class="sla-na">—</span>`;
+  const empDisplay = rec.employee_name || rec.employee_id || '—';
+  const ticket = rec.source_ticket_id ? `<span class="mono" style="font-size:10px">${rec.source_ticket_id}</span>` : '—';
+
+  return `
+<tr class="main-row" id="mrow_${i}" onclick="toggleRow(${i})">
+  <td style="text-align:center"><span class="expand-icon" id="eico_${i}">▶</span></td>
+  <td class="mono" style="font-size:11px;white-space:nowrap">${ts}</td>
+  <td><span style="font-size:12px">${esc(rec.event_type_label)}</span></td>
+  <td><span class="b-domain ${domCls}">${domLbl}</span></td>
+  <td class="mono" style="font-size:11px">${rec.role_id || '—'}</td>
+  <td class="trunc" style="font-size:11px" title="${esc(empDisplay)}">${esc(empDisplay)}</td>
+  <td>${bes === 'yes' ? '<span class="badge b-yes">YES</span>' : bes === 'no' ? '<span class="badge b-no">NO</span>' : '<span style="color:var(--muted)">—</span>'}</td>
+  <td style="font-size:11px;color:var(--muted)">${esc(rec.action_taken)||'—'}</td>
+  <td>${slaEl}</td>
+  <td>${ticket}</td>
+</tr>
+<tr class="detail-row" id="drow_${i}" style="display:none">
+  <td colspan="10">${renderDetail(rec)}</td>
+</tr>`;
+}
+
+function renderDetail(rec) {
+  const na = `<span class="dv-na">—</span>`;
+  const dv = v => v ? `<span class="dv">${esc(String(v))}</span>` : na;
+  const dt = v => v ? `<span class="dv">${fmtDateTime(v)}</span>` : na;
+  const dd = v => v ? `<span class="dv">${fmtDate(v)}</span>` : na;
+
+  return `<div class="detail-inner">
+
+    <div class="detail-section">Record Identity</div>
+    <div class="df"><span class="dl">Record ID</span>${dv(rec._id)}</div>
+    <div class="df"><span class="dl">Event Timestamp</span>${dt(rec.event_timestamp)}</div>
+    <div class="df"><span class="dl">Source System</span>${dv(rec.event_source_system)}</div>
+    <div class="df"><span class="dl">Source Ticket / Journey</span>${dv(rec.source_ticket_id)}</div>
+    <div class="df"><span class="dl">Created By Agent</span>${dv(rec.created_by_agent_id)}</div>
+
+    <div class="detail-section">Subject Identity</div>
+    <div class="df"><span class="dl">Employee ID</span>${dv(rec.employee_id)}</div>
+    <div class="df"><span class="dl">Employee Name</span>${dv(rec.employee_name)}</div>
+    <div class="df"><span class="dl">Worker Type</span>${dv(rec.worker_type)}</div>
+    <div class="df"><span class="dl">BES User Flag</span>${dv(rec.bes_user_flag)}</div>
+    <div class="df"><span class="dl">Role ID</span>${dv(rec.role_id)}</div>
+    <div class="df"><span class="dl">Role Name (snapshot)</span>${dv(rec.role_name_snapshot)}</div>
+    <div class="df"><span class="dl">Department</span>${dv(rec.department)}</div>
+
+    <div class="detail-section">Compliance Evidence</div>
+    <div class="df"><span class="dl">CIP Standard</span>${rec.cip_standard ? `<span class="badge b-cip">${esc(rec.cip_standard)}</span>` : na}</div>
+    <div class="df"><span class="dl">SLA Window (hours)</span>${dv(rec.sla_window_hours !== '' ? rec.sla_window_hours + 'h' : '')}</div>
+    <div class="df"><span class="dl">SLA Clock Start</span>${dt(rec.sla_clock_start)}</div>
+    <div class="df"><span class="dl">SLA Clock End</span>${dt(rec.sla_clock_end)}</div>
+    <div class="df"><span class="dl">SLA Completed At</span>${dt(rec.sla_completed_at)}</div>
+    <div class="df"><span class="dl">SLA Met</span>${
+      rec.sla_met.toLowerCase() === 'yes' ? '<span class="sla-met" style="font-family:var(--mono);font-size:11px">✓ Yes</span>' :
+      rec.sla_met.toLowerCase() === 'no'  ? '<span class="sla-miss" style="font-family:var(--mono);font-size:11px">✗ No</span>' : na
+    }</div>
+    <div class="df"><span class="dl">Evidence URL</span>${rec.compliance_evidence_url ? `<a href="${esc(rec.compliance_evidence_url)}" target="_blank" style="color:var(--accent);font-family:var(--mono);font-size:11px">View</a>` : na}</div>
+
+    <div class="detail-section">Access Change Detail</div>
+    <div class="df"><span class="dl">Action Taken</span>${dv(rec.action_taken)}</div>
+    <div class="df"><span class="dl">System Affected</span>${dv(rec.system_affected)}</div>
+    <div class="df" style="grid-column:span 2"><span class="dl">Previous Value</span>${dv(rec.previous_value)}</div>
+    <div class="df" style="grid-column:span 2"><span class="dl">New Value</span>${dv(rec.new_value)}</div>
+    <div class="df" style="grid-column:span 2"><span class="dl">Justification</span>${dv(rec.justification)}</div>
+    <div class="df"><span class="dl">Authorization Approver</span>${dv(rec.authorization_approver)}</div>
+    <div class="df"><span class="dl">Authorization Date</span>${dt(rec.authorization_date)}</div>
+    <div class="df"><span class="dl">RFC Number</span>${dv(rec.rfc_number)}</div>
+
+    ${(rec.badge_disabled_at || rec.tca_device_id) ? `
+    <div class="detail-section">Physical Access & TCA</div>
+    <div class="df"><span class="dl">Badge Disabled At</span>${dt(rec.badge_disabled_at)}</div>
+    <div class="df"><span class="dl">TCA Device ID</span>${dv(rec.tca_device_id)}</div>
+    ` : ''}
+
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  EXPAND / COLLAPSE
+// ══════════════════════════════════════════════════════════════════
+function toggleRow(i) {
+  const mrow = document.getElementById('mrow_' + i);
+  const drow = document.getElementById('drow_' + i);
+  const icon = document.getElementById('eico_' + i);
+  if (!drow) return;
+  const isOpen = drow.style.display !== 'none';
+  drow.style.display = isOpen ? 'none' : '';
+  mrow.classList.toggle('expanded', !isOpen);
+  if (isOpen) expandedRows.delete(i); else expandedRows.add(i);
+}
+
+function expandAll() {
+  allResults.forEach((_, i) => {
+    const drow = document.getElementById('drow_' + i);
+    const mrow = document.getElementById('mrow_' + i);
+    if (drow) { drow.style.display = ''; mrow.classList.add('expanded'); expandedRows.add(i); }
+  });
+}
+
+function collapseAll() {
+  allResults.forEach((_, i) => {
+    const drow = document.getElementById('drow_' + i);
+    const mrow = document.getElementById('mrow_' + i);
+    if (drow) { drow.style.display = 'none'; mrow.classList.remove('expanded'); expandedRows.delete(i); }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  EXPORT CSV
+// ══════════════════════════════════════════════════════════════════
+function exportCSV() {
+  if (!allResults.length) return;
+  const cols = [
+    'event_timestamp','event_type_label','event_domain','role_id','role_name_snapshot',
+    'employee_id','employee_name','worker_type','bes_user_flag','department',
+    'cip_standard','sla_window_hours','sla_clock_start','sla_clock_end','sla_completed_at','sla_met',
+    'action_taken','system_affected','previous_value','new_value','justification',
+    'authorization_approver','authorization_date','rfc_number',
+    'source_ticket_id','event_source_system','badge_disabled_at','tca_device_id',
+    'compliance_evidence_url','created_by_agent_id','_id'
+  ];
+  const header = cols.join(',');
+  const rows = allResults.map(r =>
+    cols.map(c => {
+      const v = r[c] ?? '';
+      const s = String(v).replace(/"/g, '""');
+      return s.includes(',') || s.includes('\n') || s.includes('"') ? `"${s}"` : s;
+    }).join(',')
+  );
+  const csv = [header, ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `audit_trail_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════════════════════
+function showState(msg, isErr = false, isHtml = false) {
+  const el = document.getElementById('stateMsg');
+  el.style.display = '';
+  el.className = 'state-msg' + (isErr ? ' err' : '');
+  el.innerHTML = isHtml ? msg : `<div class="ico">${isErr ? '⚠' : '⬡'}</div><p>${msg}</p>`;
+}
+
+function fmtDateTime(v) {
+  if (!v) return '—';
+  try { return new Date(v).toLocaleString(undefined, {dateStyle:'short', timeStyle:'short'}); } catch { return v; }
+}
+function fmtDate(v) {
+  if (!v) return '—';
+  try { return new Date(v).toLocaleDateString(); } catch { return v; }
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function busy(id, b) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.disabled = b;
+  if (b) { el._t = el.innerHTML; el.innerHTML = '<span class="spn"></span> Searching…'; }
+  else   { el.innerHTML = el._t || 'Search'; }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════════════════════════
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = next === 'light' ? '☾' : '☀';
+  localStorage.setItem('velco-theme', next);
+}
+(function() {
+  const saved = localStorage.getItem('velco-theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = '☾';
+    });
+  }
+  // Populate all event types on load (no domain selected)
+  onDomainChange();
+})();
+</script>
+</body>
+</html>
