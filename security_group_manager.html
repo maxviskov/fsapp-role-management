@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Security Group Manager · VELCO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--sur:#171c26;--sur2:#1e2535;--sur3:#2a3245;
+  --brd:#2a3245;--brd2:#3d4e6e;
+  --txt:#e8ecf4;--muted:#7a8aaa;--dim:#4a5a7a;
+  --acc:#4f8ef7;--acc2:#38d9a9;
+  --red:#ff6b6b;--red-bg:rgba(255,107,107,.12);--red-brd:rgba(255,107,107,.3);
+  --ylw:#ffa94d;
+  --r:6px;--t:150ms ease;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+html,body{height:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--txt);font-size:13px;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Header ── */
+header{background:var(--sur);border-bottom:1px solid var(--brd);padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--acc);letter-spacing:2px;text-transform:uppercase;border:1px solid var(--acc);padding:3px 8px;border-radius:3px}
+header h1{font-size:14px;font-weight:500}
+.sp1{flex:1}
+.env{font-family:var(--mono);font-size:10px;color:var(--ylw);border:1px solid var(--ylw);padding:2px 7px;border-radius:3px}
+#api-st{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:3px;border:1px solid var(--brd);color:var(--muted)}
+#api-st.ok{color:var(--acc2);border-color:rgba(56,217,169,.3)}
+#api-st.err{color:var(--red);border-color:var(--red-brd)}
+
+/* ── Layout ── */
+.wrap{display:flex;flex:1;overflow:hidden}
+.sidebar{width:272px;flex-shrink:0;border-right:1px solid var(--brd);display:flex;flex-direction:column;background:var(--sur)}
+.panel{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+
+/* ── Sidebar ── */
+.sb-hdr{padding:11px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sb-hdr h2{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
+#sg-list{overflow-y:auto;flex:1}
+.pf{padding:9px 12px;border-top:1px solid var(--brd);flex-shrink:0}
+.sg-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--brd);transition:background var(--t);display:flex;align-items:center;gap:8px}
+.sg-item:hover{background:var(--sur2)}
+.sg-item.active{background:rgba(79,142,247,.1);border-left:2px solid var(--acc)}
+.sg-item.active .sg-name{color:var(--acc)}
+.sg-name{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-sub{font-size:10px;color:var(--dim);font-family:var(--mono)}
+.sg-cnt{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--acc);color:#fff;flex-shrink:0}
+.sb-msg{padding:20px 14px;color:var(--dim);font-size:12px;text-align:center;font-family:var(--mono)}
+
+/* ── Buttons ── */
+.btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--r);border:none;cursor:pointer;transition:opacity var(--t),transform var(--t);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:hover:not(:disabled){opacity:.82;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.bp{background:var(--acc);color:#fff}
+.bs{background:var(--sur2);color:var(--txt);border:1px solid var(--brd)}
+.bd{background:var(--red-bg);color:var(--red);border:1px solid var(--red-brd)}
+.bg{background:transparent;color:var(--muted);border:1px solid transparent;padding:4px 7px;font-size:11px}
+.bg:hover{color:var(--txt);border-color:var(--brd);opacity:1!important;transform:none!important}
+.bsm{padding:4px 9px;font-size:11px}
+
+/* ── Cards ── */
+.card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+.ch{padding:11px 15px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;background:var(--sur2)}
+.ch-left{flex:1;min-width:0}
+.ch h2{font-size:13px;font-weight:600}
+.ch .sub{font-size:11px;color:var(--muted);margin-top:1px}
+.ch-acts{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.cb{padding:14px 15px}
+.cb-scroll{padding:14px 15px;overflow-y:auto;max-height:calc(100vh - 260px)}
+
+/* ── SG info strip ── */
+.sg-info{display:flex;flex-wrap:wrap;gap:8px 24px}
+.si{display:flex;flex-direction:column;gap:3px}
+.sl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.sv{font-family:var(--mono);font-size:12px}
+.sv-note{font-size:12px;color:var(--muted)}
+
+/* ── Tree ── */
+.tree{display:flex;flex-direction:column;gap:5px}
+
+/* L1 (PAL) block */
+.l1-block{border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;transition:border-color var(--t)}
+.l1-block.assigned{border-color:rgba(79,142,247,.4)}
+
+.l1-head{padding:9px 13px;background:var(--sur2);display:flex;align-items:center;gap:9px;transition:background var(--t)}
+.l1-head.expandable{cursor:pointer}
+.l1-head.expandable:hover{background:var(--sur3)}
+
+.l1-chk{width:15px;height:15px;accent-color:var(--acc);flex-shrink:0;cursor:pointer}
+.l1-name{font-size:13px;font-weight:500;flex:1}
+.l1-tag{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--brd);color:var(--muted);background:var(--sur3);flex-shrink:0}
+.l1-tag.on{color:var(--acc2);border-color:rgba(56,217,169,.3);background:rgba(56,217,169,.07)}
+.l1-tag.other{color:var(--ylw);border-color:rgba(255,169,77,.3);background:rgba(255,169,77,.07)}
+.l1-arrow{font-size:10px;color:var(--dim);transition:transform .18s;flex-shrink:0;width:12px;text-align:center}
+.l1-arrow.open{transform:rotate(90deg)}
+.l1-count{font-size:10px;color:var(--dim);font-family:var(--mono);flex-shrink:0}
+
+/* L2 list */
+.l2-list{display:none;flex-direction:column}
+.l2-list.open{display:flex}
+.l2-row{padding:7px 13px 7px 38px;display:flex;align-items:center;gap:9px;border-top:1px solid var(--brd);background:var(--bg);transition:background var(--t)}
+.l2-row:hover{background:var(--sur)}
+.l2-chk{width:14px;height:14px;accent-color:var(--acc);flex-shrink:0;cursor:pointer}
+.l2-chk:disabled{cursor:not-allowed;opacity:.35}
+.l2-name{font-size:12px;flex:1}
+.l2-no-children{padding:8px 13px 8px 38px;font-size:11px;color:var(--dim);border-top:1px solid var(--brd);font-family:var(--mono);font-style:italic}
+
+/* Save hint */
+.save-hint{font-size:11px;color:var(--dim);font-family:var(--mono);padding-top:10px;border-top:1px solid var(--brd);margin-top:10px}
+.save-hint.dirty{color:var(--ylw)}
+
+/* ── Form ── */
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fs{grid-column:1/-1}
+.ff{display:flex;flex-direction:column;gap:5px}
+.ff label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.ff input,.ff select,.ff textarea{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r);padding:7px 10px;color:var(--txt);font-family:var(--mono);font-size:12px;outline:none;transition:border-color var(--t);width:100%}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--acc)}
+.ff input[readonly]{opacity:.5;cursor:not-allowed}
+.ff textarea{resize:vertical;min-height:64px;font-family:var(--sans);font-size:12px}
+.req{color:var(--red);margin-left:2px}
+.sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding-bottom:5px;border-bottom:1px solid var(--brd);grid-column:1/-1;margin-top:4px}
+
+/* ── Empty ── */
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dim);gap:10px;padding:48px}
+.empty-state .ico{font-size:36px;opacity:.4}
+.empty-state p{font-size:13px;text-align:center;line-height:1.6}
+
+/* ── Toast ── */
+#tc{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:2000}
+.toast{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r);padding:9px 13px;font-size:12px;min-width:240px;animation:tIn .18s ease}
+@keyframes tIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.t-s{border-left:3px solid var(--acc2)}
+.t-e{border-left:3px solid var(--red)}
+.t-i{border-left:3px solid var(--acc)}
+
+/* ── Spinner ── */
+.spn{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Modal ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);animation:fi .12s ease}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.mo{background:var(--sur);border:1px solid var(--brd2);border-radius:8px;width:min(480px,95vw);max-height:88vh;display:flex;flex-direction:column;animation:su .15s ease}
+@keyframes su{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.moh{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.moh h3{font-size:14px;font-weight:600;flex:1}
+.mob{padding:18px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:13px}
+.mof{padding:12px 18px;border-top:1px solid var(--brd);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.conf-body{padding:14px 18px;font-size:13px;color:var(--muted);line-height:1.6}
+.conf-body strong{color:var(--txt)}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">VELCO</span>
+  <h1>Security Group Manager</h1>
+  <div class="sp1"></div>
+  <span id="api-st">Connecting…</span>
+  <button class="btn bs bsm" onclick="init()">↺ Refresh</button>
+  <span class="env">DEV / BETA</span>
+</header>
+
+<div class="wrap">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-hdr">
+      <h2>Security Groups</h2>
+      <button class="btn bp bsm" onclick="openNewSG()">+ New</button>
+    </div>
+    <div id="sg-list"><div class="sb-msg"><span class="spn"></span> Loading…</div></div>
+    <div class="pf">
+      <button class="btn bs" style="width:100%;font-size:11px" onclick="init()">↻ Refresh all</button>
+    </div>
+  </div>
+
+  <!-- Main panel -->
+  <div class="panel" id="main-panel">
+    <div class="empty-state">
+      <div class="ico">🔐</div>
+      <p>Select a Security Group from the list,<br>or create a new one to get started.</p>
+    </div>
+  </div>
+
+</div>
+<div id="tc"></div>
+
+<!-- Modal: New / Edit SG -->
+<div id="mod-sg" class="ov" style="display:none">
+  <div class="mo">
+    <div class="moh">
+      <h3 id="mod-sg-t">New Security Group</h3>
+      <button class="btn bg bsm" onclick="closeM('mod-sg')">✕</button>
+    </div>
+    <div class="mob">
+      <div class="fg2">
+        <div class="sec">Identity</div>
+        <div class="ff">
+          <label>Security Group ID <span class="req">*</span></label>
+          <input type="text" id="sg-f-id" placeholder="e.g. SG1200"/>
+        </div>
+        <div class="ff">
+          <label>Security Group Name <span class="req">*</span></label>
+          <input type="text" id="sg-f-name" placeholder="e.g. Control Center Operators"/>
+        </div>
+        <div class="ff fs">
+          <label>Description / Notes</label>
+          <textarea id="sg-f-notes" placeholder="Optional description of this security group…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="mof">
+      <button class="btn bs" onclick="closeM('mod-sg')">Cancel</button>
+      <button class="btn bp" id="btn-sg-save" onclick="saveSG()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirm -->
+<div id="mod-conf" class="ov" style="display:none">
+  <div class="mo" style="width:min(420px,95vw)">
+    <div class="moh"><h3 id="conf-t">Confirm</h3><button class="btn bg bsm" onclick="closeM('mod-conf')">✕</button></div>
+    <div class="conf-body" id="conf-body"></div>
+    <div class="mof">
+      <button class="btn bs" onclick="closeM('mod-conf')">Cancel</button>
+      <button class="btn bd" id="conf-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════════════
+const CFG = {
+  domain:    'velco-betabox.freshservice.com',
+  apiKey:    'uloskM4yZXvLPVUdOxyD',  // 🔑 replace before production
+  sgObj:     37000019277,  // Security Groups
+  palObj:    37000019257,  // Physical Access Locations (L1)
+  pl2Obj:    37000019278,  // Physical_Location_Level_2 (L2)
+  sgPalObj:  37000019280,  // SG_PAL_Assignment  junction
+  sgL2Obj:   37000019281,  // SG_L2_Assignment   junction
+};
+
+// ── Junction + child field names (exactly as in FS Object Fields) ──
+const F = {
+  // SG_PAL_Assignment
+  sgPal_sg:      'security_group_id',       // → Security Groups
+  sgPal_pal:     'physiscal_location_id',   // → Physical Access Locations (FS typo preserved)
+  // SG_L2_Assignment
+  sgL2_sg:       'security_group_id',       // → Security Groups
+  sgL2_l2:       'physical_location_level_2_id', // → Physical_Location_Level_2
+  // Physical_Location_Level_2 → parent PAL
+  l2_parent:     'physiscal_location_id',   // (FS typo preserved)
+};
+
+const BASE = 'https://' + CFG.domain;
+const HDR  = { Authorization:'Basic '+btoa(CFG.apiKey+':X'), 'Content-Type':'application/json' };
+
+// ═══════════════════════════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════════════════════════
+const GET  = async p => { const r=await fetch(BASE+p,{headers:HDR}); if(!r.ok) throw new Error(`GET ${p} → ${r.status}`); return r.json(); };
+const POST = async (p,b) => { const r=await fetch(BASE+p,{method:'POST',headers:HDR,body:JSON.stringify(b)}); if(!r.ok){const t=await r.text();throw new Error(`POST ${p} → ${r.status}: ${t}`);} return r.json(); };
+const PUT  = async (p,b) => { const r=await fetch(BASE+p,{method:'PUT', headers:HDR,body:JSON.stringify(b)}); if(!r.ok){const t=await r.text();throw new Error(`PUT ${p} → ${r.status}: ${t}`);} return r.json(); };
+const DEL  = async p    => { const r=await fetch(BASE+p,{method:'DELETE',headers:HDR}); if(!r.ok) throw new Error(`DEL ${p} → ${r.status}`); };
+
+async function fetchAll(objId) {
+  let all=[], page=1;
+  while(true) {
+    const d   = await GET(`/api/v2/objects/${objId}/records?page_size=100&page=${page}`);
+    const recs = d.records||[];
+    all = all.concat(recs);
+    if(recs.length < 100) break;
+    page++;
+  }
+  return all;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+let sgRecs    = [];   // Security Group records
+let palRecs   = [];   // L1 Physical Access Location records
+let pl2Recs   = [];   // L2 Physical Location Level 2 records
+let palAssign = [];   // SG_PAL_Assignment junction records
+let l2Assign  = [];   // SG_L2_Assignment  junction records
+let selSGId   = null; // currently selected SG bo_display_id
+let editSGId  = null;
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════
+async function init() {
+  setSt('Connecting…', '');
+  try {
+    const [sgs, pals, pl2s, sgPals, sgL2s] = await Promise.all([
+      fetchAll(CFG.sgObj),
+      fetchAll(CFG.palObj),
+      fetchAll(CFG.pl2Obj),
+      fetchAll(CFG.sgPalObj),
+      fetchAll(CFG.sgL2Obj),
+    ]);
+    sgRecs    = sgs;
+    palRecs   = pals;
+    pl2Recs   = pl2s;
+    palAssign = sgPals;
+    l2Assign  = sgL2s;
+
+    setSt(`${sgs.length} SGs · ${pals.length} L1s · ${pl2s.length} L2s · ${sgPals.length} L1-links · ${sgL2s.length} L2-links`, 'ok');
+    console.log('[SG recs]',  sgs.map(r=>r.data));
+    console.log('[PAL recs]', pals.map(r=>r.data));
+    console.log('[PL2 recs]', pl2s.map(r=>r.data));
+    console.log('[PAL asgn]', sgPals.map(r=>r.data));
+    console.log('[L2 asgn]',  sgL2s.map(r=>r.data));
+
+    renderSidebar();
+    if(selSGId !== null) renderDetail(selSGId);
+  } catch(e) {
+    setSt('Error: '+e.message, 'err');
+    toast('Load failed: '+e.message, 'e');
+    console.error('[init]', e);
+  }
+}
+
+function setSt(msg, cls) {
+  const el = document.getElementById('api-st');
+  el.textContent = msg;
+  el.className = cls||'';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════════════════════════════════════
+function renderSidebar() {
+  const el = document.getElementById('sg-list');
+  if(!sgRecs.length) {
+    el.innerHTML = '<div class="sb-msg">No security groups yet.<br>Click + New to create one.</div>';
+    return;
+  }
+  const sorted = [...sgRecs].sort((a,b)=>(a.data.security_group_id||'').localeCompare(b.data.security_group_id||''));
+  el.innerHTML = sorted.map(sg => {
+    const d   = sg.data;
+    const id  = d.bo_display_id;
+    const cnt = palAssign.filter(r=>lid(r.data[F.sgPal_sg])===id).length;
+    const active = selSGId===id;
+    return `<div class="sg-item${active?' active':''}" onclick="selectSG(${id})">
+      <div style="flex:1;min-width:0">
+        <div class="sg-name">${esc(d.security_group_name||'Unnamed')}</div>
+        <div class="sg-sub">${esc(d.security_group_id||'')}</div>
+      </div>
+      ${cnt?`<span class="sg-cnt">${cnt}</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  DETAIL
+// ═══════════════════════════════════════════════════════════════════
+function selectSG(id) {
+  selSGId = id;
+  renderSidebar();
+  renderDetail(id);
+}
+
+function renderDetail(sgId) {
+  const sg = sgRecs.find(s=>s.data.bo_display_id===sgId);
+  if(!sg) return;
+  const d = sg.data;
+
+  // Build lookup maps for this SG
+  // palId → junction record bo_display_id
+  const myPALMap = {};
+  palAssign.filter(r=>lid(r.data[F.sgPal_sg])===sgId)
+           .forEach(r=>{ myPALMap[lid(r.data[F.sgPal_pal])] = r.data.bo_display_id; });
+
+  // l2Id → junction record bo_display_id
+  const myL2Map = {};
+  l2Assign.filter(r=>lid(r.data[F.sgL2_sg])===sgId)
+          .forEach(r=>{ myL2Map[lid(r.data[F.sgL2_l2])] = r.data.bo_display_id; });
+
+  const l1Count = Object.keys(myPALMap).length;
+  const l2Count = Object.keys(myL2Map).length;
+
+  document.getElementById('main-panel').innerHTML = `
+
+    <!-- Header card -->
+    <div class="card">
+      <div class="ch">
+        <div class="ch-left">
+          <h2>${esc(d.security_group_name||'Unnamed')}</h2>
+          <div class="sub">${esc(d.security_group_id||'')} · Record #${sgId}</div>
+        </div>
+        <div class="ch-acts">
+          <button class="btn bg bsm" onclick="openEditSG(${sgId})">✎ Edit</button>
+          <button class="btn bd bsm" onclick="confirmDeleteSG(${sgId})">✕ Delete</button>
+        </div>
+      </div>
+      <div class="cb">
+        <div class="sg-info">
+          <div class="si"><span class="sl">SG ID</span><span class="sv">${esc(d.security_group_id||'—')}</span></div>
+          <div class="si"><span class="sl">Name</span><span class="sv">${esc(d.security_group_name||'—')}</span></div>
+          <div class="si"><span class="sl">L1 Locations</span><span class="sv">${l1Count}</span></div>
+          <div class="si"><span class="sl">L2 Sub-locations</span><span class="sv">${l2Count}</span></div>
+          ${d.notes ? `<div class="si" style="grid-column:1/-1"><span class="sl">Notes</span><span class="sv-note">${esc(d.notes)}</span></div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tree card -->
+    <div class="card">
+      <div class="ch">
+        <div class="ch-left">
+          <h2>Physical Access Structure</h2>
+          <div class="sub">SG → L1 Locations → L2 Sub-locations</div>
+        </div>
+        <div class="ch-acts">
+          <button class="btn bp bsm" id="btn-save-tree" onclick="saveTree(${sgId})">Save Changes</button>
+        </div>
+      </div>
+      <div class="cb-scroll">
+        ${buildTree(sgId, myPALMap, myL2Map)}
+        <div class="save-hint" id="save-hint">Check or uncheck items, then click Save Changes.</div>
+      </div>
+    </div>
+
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  TREE BUILDER
+//  Structure: SG → [L1 rows] → [L2 rows]
+//  - All L1s shown, assigned ones at top
+//  - L2s are only selectable when their parent L1 is checked
+//  - Unchecking an L1 disables + unchecks all its L2s
+// ═══════════════════════════════════════════════════════════════════
+function buildTree(sgId, myPALMap, myL2Map) {
+  if(!palRecs.length) return '<div style="color:var(--dim);font-family:var(--mono);font-size:12px">No L1 locations found.</div>';
+
+  // PALs assigned to OTHER SGs via junction table (not this SG)
+  const otherSGPALIds = new Set(
+    palAssign
+      .filter(r=>lid(r.data[F.sgPal_sg])!==sgId && lid(r.data[F.sgPal_sg])!==null)
+      .map(r=>lid(r.data[F.sgPal_pal]))
+  );
+
+  // Sort: assigned first, then alphabetical
+  const sorted = [...palRecs].sort((a,b) => {
+    const aM = a.data.bo_display_id in myPALMap ? 0 : 1;
+    const bM = b.data.bo_display_id in myPALMap ? 0 : 1;
+    if(aM!==bM) return aM-bM;
+    return (a.data.physical_access_location||'').localeCompare(b.data.physical_access_location||'');
+  });
+
+  const rows = sorted.map(pal => {
+    const pd    = pal.data;
+    const palId = pd.bo_display_id;
+    const isMine  = palId in myPALMap;
+    const isOther = otherSGPALIds.has(palId) && !isMine;
+
+    // L2 children of this L1
+    const children = pl2Recs.filter(l=>lid(l.data[F.l2_parent])===palId);
+    const hasL2    = children.length > 0;
+
+    // L2 rows
+    const l2Html = hasL2
+      ? children.map(l => {
+          const ld   = l.data;
+          const l2Id = ld.bo_display_id;
+          const l2Mine = l2Id in myL2Map;
+          return `<div class="l2-row">
+            <input type="checkbox" class="l2-chk" id="l2-${l2Id}" value="${l2Id}"
+                   data-pal="${palId}"
+                   ${l2Mine?'checked':''}
+                   ${!isMine?'disabled':''}
+                   onchange="markDirty()"/>
+            <label for="l2-${l2Id}" class="l2-name" style="cursor:${isMine?'pointer':'default'}">${esc(ld.physical_location_level_2_id||'#'+l2Id)}</label>
+          </div>`;
+        }).join('')
+      : `<div class="l2-no-children">No sub-locations defined</div>`;
+
+    const tag = isMine
+      ? `<span class="l1-tag on">✓ Assigned</span>`
+      : isOther
+        ? `<span class="l1-tag other">Other SG</span>`
+        : `<span class="l1-tag">Unassigned</span>`;
+
+    const l2Summary = hasL2
+      ? `<span class="l1-count">${children.filter(l=>l.data.bo_display_id in myL2Map).length}/${children.length} L2s</span>`
+      : '';
+
+    return `<div class="l1-block${isMine?' assigned':''}" id="l1-block-${palId}">
+      <div class="l1-head${hasL2?' expandable':''}" ${hasL2?`onclick="toggleL1(${palId})"`:''}>
+        <input type="checkbox" class="l1-chk" id="l1-${palId}" value="${palId}"
+               ${isMine?'checked':''}
+               onclick="event.stopPropagation(); onL1Check(${palId},[${children.map(l=>l.data.bo_display_id).join(',')}])"
+               onchange="markDirty()"/>
+        <span class="l1-name">${esc(pd.physical_access_location||'#'+palId)}</span>
+        ${l2Summary}
+        ${tag}
+        ${hasL2?`<span class="l1-arrow${isMine?' open':''}" id="arr-${palId}">▶</span>`:''}
+      </div>
+      ${hasL2?`<div class="l2-list${isMine?' open':''}" id="l2s-${palId}">${l2Html}</div>`:''}
+    </div>`;
+  }).join('');
+
+  return `<div class="tree">${rows}</div>`;
+}
+
+// ─── Tree interactions ─────────────────────────────────────────────
+function toggleL1(palId) {
+  const list = document.getElementById('l2s-'+palId);
+  const arr  = document.getElementById('arr-'+palId);
+  if(!list) return;
+  const open = list.classList.toggle('open');
+  if(arr) arr.classList.toggle('open', open);
+}
+
+function onL1Check(palId, l2Ids) {
+  const cb    = document.getElementById('l1-'+palId);
+  const block = document.getElementById('l1-block-'+palId);
+  const list  = document.getElementById('l2s-'+palId);
+  const arr   = document.getElementById('arr-'+palId);
+
+  if(cb.checked) {
+    block?.classList.add('assigned');
+    if(list){ list.classList.add('open'); }
+    if(arr) { arr.classList.add('open'); }
+    // Enable + check all L2s
+    l2Ids.forEach(id => {
+      const c = document.getElementById('l2-'+id);
+      if(c){ c.disabled=false; c.checked=true; c.nextElementSibling.style.cursor='pointer'; }
+    });
+  } else {
+    block?.classList.remove('assigned');
+    // Disable + uncheck all L2s
+    l2Ids.forEach(id => {
+      const c = document.getElementById('l2-'+id);
+      if(c){ c.disabled=true; c.checked=false; c.nextElementSibling.style.cursor='default'; }
+    });
+  }
+  markDirty();
+}
+
+function markDirty() {
+  const el = document.getElementById('save-hint');
+  if(el){ el.textContent='Unsaved changes — click Save Changes to apply.'; el.className='save-hint dirty'; }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SAVE TREE
+//  Diffs checkbox state vs loaded junction records.
+//  Creates/deletes only what changed.
+// ═══════════════════════════════════════════════════════════════════
+async function saveTree(sgId) {
+  const btn = document.getElementById('btn-save-tree');
+  btn.disabled=true; btn.innerHTML='<span class="spn"></span> Saving…';
+
+  // ── Loaded state ──────────────────────────────────────────────────
+  const loadedPAL = {};  // palId → junction bo_display_id
+  palAssign.filter(r=>lid(r.data[F.sgPal_sg])===sgId)
+           .forEach(r=>{ loadedPAL[lid(r.data[F.sgPal_pal])] = r.data.bo_display_id; });
+
+  const loadedL2 = {};   // l2Id → junction bo_display_id
+  l2Assign.filter(r=>lid(r.data[F.sgL2_sg])===sgId)
+          .forEach(r=>{ loadedL2[lid(r.data[F.sgL2_l2])] = r.data.bo_display_id; });
+
+  // ── Desired state from checkboxes ─────────────────────────────────
+  const wantPAL = new Set([...document.querySelectorAll('.l1-chk:checked')].map(c=>parseInt(c.value)));
+  const wantL2  = new Set([...document.querySelectorAll('.l2-chk:checked')].map(c=>parseInt(c.value)));
+
+  // ── Diffs ──────────────────────────────────────────────────────────
+  const palCreate   = [...wantPAL].filter(id=>!(id in loadedPAL));
+  const palDelete   = Object.entries(loadedPAL).filter(([id])=>!wantPAL.has(parseInt(id)));
+  const l2Create    = [...wantL2].filter(id=>!(id in loadedL2));
+  const l2Delete    = Object.entries(loadedL2).filter(([id])=>!wantL2.has(parseInt(id)));
+
+  console.log('[saveTree] L1 create:',palCreate,'delete:',palDelete);
+  console.log('[saveTree] L2 create:',l2Create, 'delete:',l2Delete);
+
+  if(!palCreate.length && !palDelete.length && !l2Create.length && !l2Delete.length) {
+    toast('No changes to save.','i');
+    btn.disabled=false; btn.innerHTML='Save Changes';
+    return;
+  }
+
+  let ok=0, fail=0;
+
+  // Delete L1 junction records (cascade: also delete their L2 junctions)
+  for(const [palId, juncId] of palDelete) {
+    // Find orphaned L2 junctions belonging to this L1
+    const orphanL2s = pl2Recs
+      .filter(l=>lid(l.data[F.l2_parent])===parseInt(palId))
+      .map(l=>l.data.bo_display_id);
+    for(const l2Id of orphanL2s) {
+      const jId = loadedL2[l2Id];
+      if(jId) {
+        try{ await DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${jId}`); ok++; }
+        catch(e){ console.error('[saveTree] cascade delete L2 junc',jId,e.message); fail++; }
+      }
+    }
+    try{ await DEL(`/api/v2/objects/${CFG.sgPalObj}/records/${juncId}`); ok++; }
+    catch(e){ console.error('[saveTree] delete L1 junc',juncId,e.message); fail++; }
+  }
+
+  // Create new L1 junction records
+  for(const palId of palCreate) {
+    try{
+      await POST(`/api/v2/objects/${CFG.sgPalObj}/records`,{ data:{
+        [F.sgPal_sg]:  sgId,
+        [F.sgPal_pal]: palId,
+      }});
+      ok++;
+    } catch(e){ console.error('[saveTree] create L1 junc',palId,e.message); fail++; }
+  }
+
+  // Delete removed L2 junction records (not already cascade-deleted above)
+  for(const [l2Id, juncId] of l2Delete) {
+    // Skip if already deleted via cascade
+    const stillExists = palAssign.find(r=>
+      lid(r.data[F.sgPal_sg])===sgId &&
+      pl2Recs.find(l=>l.data.bo_display_id===parseInt(l2Id) && !wantPAL.has(lid(l.data[F.l2_parent])))
+    );
+    try{ await DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${juncId}`); ok++; }
+    catch(e){ console.error('[saveTree] delete L2 junc',juncId,e.message); fail++; }
+  }
+
+  // Create new L2 junction records
+  for(const l2Id of l2Create) {
+    try{
+      await POST(`/api/v2/objects/${CFG.sgL2Obj}/records`,{ data:{
+        [F.sgL2_sg]: sgId,
+        [F.sgL2_l2]: l2Id,
+      }});
+      ok++;
+    } catch(e){ console.error('[saveTree] create L2 junc',l2Id,e.message); fail++; }
+  }
+
+  if(ok)   toast(`${ok} change${ok>1?'s':''} saved.`,'s');
+  if(fail) toast(`${fail} failed — check console.`,'e');
+
+  btn.disabled=false; btn.innerHTML='Save Changes';
+  await init();
+  if(selSGId!==null) renderDetail(selSGId);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SG CRUD
+// ═══════════════════════════════════════════════════════════════════
+function openNewSG() {
+  editSGId=null;
+  document.getElementById('mod-sg-t').textContent='New Security Group';
+  document.getElementById('sg-f-id').value='';
+  document.getElementById('sg-f-name').value='';
+  document.getElementById('sg-f-notes').value='';
+  document.getElementById('sg-f-id').removeAttribute('readonly');
+  document.getElementById('mod-sg').style.display='flex';
+}
+
+function openEditSG(recId) {
+  const sg = sgRecs.find(s=>s.data.bo_display_id===recId);
+  if(!sg) return;
+  const d = sg.data;
+  editSGId=recId;
+  document.getElementById('mod-sg-t').textContent='Edit Security Group';
+  document.getElementById('sg-f-id').value   = d.security_group_id||'';
+  document.getElementById('sg-f-name').value = d.security_group_name||'';
+  document.getElementById('sg-f-notes').value= d.notes||'';
+  document.getElementById('sg-f-id').setAttribute('readonly','readonly');
+  document.getElementById('mod-sg').style.display='flex';
+}
+
+async function saveSG() {
+  const isNew    = editSGId===null;
+  const sgIdVal  = document.getElementById('sg-f-id').value.trim();
+  const sgName   = document.getElementById('sg-f-name').value.trim();
+  const sgNotes  = document.getElementById('sg-f-notes').value.trim();
+
+  if(!sgIdVal) { toast('Security Group ID is required.','e'); return; }
+  if(!sgName)  { toast('Security Group Name is required.','e'); return; }
+
+  const btn = document.getElementById('btn-sg-save');
+  btn.disabled=true; btn.innerHTML='<span class="spn"></span> Saving…';
+
+  const data = {
+    security_group_id:   sgIdVal,
+    security_group_name: sgName,
+    ...(sgNotes ? { notes: sgNotes } : {}),
+  };
+
+  // Wrap lookups correctly for PUT
+  const payload = isNew ? { data } : { data: {
+    security_group_id:   sgIdVal,
+    security_group_name: sgName,
+    ...(sgNotes ? { notes: sgNotes } : {}),
+  }};
+
+  try {
+    let newRecId = editSGId;
+    if(isNew) {
+      const res = await POST(`/api/v2/objects/${CFG.sgObj}/records`, payload);
+      newRecId  = res?.data?.bo_display_id;
+      toast('Security Group created.','s');
+    } else {
+      await PUT(`/api/v2/objects/${CFG.sgObj}/records/${editSGId}`, payload);
+      toast('Security Group updated.','s');
+    }
+    closeM('mod-sg');
+    await init();
+    if(newRecId) selectSG(newRecId);
+  } catch(e) {
+    toast('Save failed: '+e.message,'e');
+    console.error('[saveSG]',e);
+  } finally {
+    btn.disabled=false; btn.innerHTML='Save';
+  }
+}
+
+function confirmDeleteSG(recId) {
+  const sg = sgRecs.find(s=>s.data.bo_display_id===recId);
+  if(!sg) return;
+  const d = sg.data;
+  const l1Cnt = palAssign.filter(r=>lid(r.data[F.sgPal_sg])===recId).length;
+  const l2Cnt = l2Assign.filter(r=>lid(r.data[F.sgL2_sg])===recId).length;
+  const warn = (l1Cnt||l2Cnt)
+    ? `<br><br><strong style="color:var(--ylw)">⚠</strong> Also deletes ${l1Cnt} L1 link${l1Cnt!==1?'s':''} and ${l2Cnt} L2 link${l2Cnt!==1?'s':''}.`
+    : '';
+  confirm_(`Delete "${d.security_group_name||d.security_group_id}"?`,
+    `Permanently removes this Security Group and all its assignment records.${warn}`,
+    async()=>{
+      try{
+        const juncPAL = palAssign.filter(r=>lid(r.data[F.sgPal_sg])===recId);
+        const juncL2  = l2Assign.filter(r=>lid(r.data[F.sgL2_sg])===recId);
+        await Promise.all([
+          ...juncPAL.map(r=>DEL(`/api/v2/objects/${CFG.sgPalObj}/records/${r.data.bo_display_id}`).catch(()=>{})),
+          ...juncL2.map(r=>DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${r.data.bo_display_id}`).catch(()=>{})),
+        ]);
+        await DEL(`/api/v2/objects/${CFG.sgObj}/records/${recId}`);
+        toast('Deleted.','s');
+        selSGId=null;
+        await init();
+        document.getElementById('main-panel').innerHTML=`<div class="empty-state"><div class="ico">🔐</div><p>Select a Security Group from the list.</p></div>`;
+      } catch(e){ toast('Delete failed: '+e.message,'e'); }
+    }
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function lid(f){
+  if(f==null) return null;
+  if(typeof f==='object'){
+    // FS returns {"id":{}} for empty lookup fields — treat as null
+    if(f.id==null || typeof f.id==='object') return null;
+    const n=parseInt(f.id); return isNaN(n)?null:n;
+  }
+  const n=parseInt(f); return isNaN(n)?null:n;
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function closeM(id){ document.getElementById(id).style.display='none'; }
+
+let _cb=null;
+function confirm_(title, body, cb){
+  document.getElementById('conf-t').textContent=title;
+  document.getElementById('conf-body').innerHTML=body;
+  _cb=cb;
+  document.getElementById('conf-ok').onclick=async()=>{ closeM('mod-conf'); if(_cb)await _cb(); };
+  document.getElementById('mod-conf').style.display='flex';
+}
+
+function toast(msg,type='i'){
+  const tc=document.getElementById('tc');
+  const t=document.createElement('div');
+  t.className='toast t-'+type;
+  t.textContent=msg;
+  tc.appendChild(t);
+  setTimeout(()=>t.remove(),4500);
+}
+
+document.querySelectorAll('.ov').forEach(el=>
+  el.addEventListener('click',e=>{ if(e.target===el)el.style.display='none'; })
+);
+
+init();
+</script>
+</body>
+</html>
