@@ -241,12 +241,21 @@ const GET  = async p => { const r = await fetch(BASE+p, {headers:HDR}); if(!r.ok
 // ══════════════════════════════════════════════════════════════════
 const EVENT_VOCAB = {
   role_mgmt: [
-    { value: 'Role_Definition_Changed',   label: 'Role Definition Changed',   cipStd: 'CIP-004-7'     },
-    { value: 'Entitlement_Added',         label: 'Entitlement Added',         cipStd: 'CIP-004-7'     },
-    { value: 'Entitlement_Removed',       label: 'Entitlement Removed',       cipStd: 'CIP-004-7'     },
-    { value: 'Role_Reviewed_Recertified', label: 'Role Reviewed / Recertified', cipStd: 'CIP-004-7'   },
-    { value: 'Role_Deactivated',          label: 'Role Deactivated',          cipStd: 'Internal'      },
+    { value: 'Role_Definition_Changed',   label: 'Role Definition Changed',   cipStd: 'CIP-004-7'  },
+    { value: 'Entitlement_Added',         label: 'Entitlement Added',         cipStd: 'CIP-004-7'  },
+    { value: 'Entitlement_Removed',       label: 'Entitlement Removed',       cipStd: 'CIP-004-7'  },
+    { value: 'Role_Reviewed_Recertified', label: 'Role Reviewed / Recertified', cipStd: 'CIP-004-7' },
+    { value: 'Role_Deactivated',          label: 'Role Deactivated',          cipStd: 'Internal'   },
+    { value: 'SG_Created',               label: 'SG Created',                cipStd: 'Internal'   },
+    { value: 'SG_Updated',               label: 'SG Updated',                cipStd: 'Internal'   },
+    { value: 'SG_Deleted',               label: 'SG Deleted',                cipStd: 'Internal'   },
+    { value: 'L1_Location_Assigned',     label: 'L1 Location Assigned',      cipStd: 'Internal'   },
+    { value: 'L1_Location_Unassigned',   label: 'L1 Location Unassigned',    cipStd: 'Internal'   },
+    { value: 'L2_Location_Assigned',     label: 'L2 Location Assigned',      cipStd: 'Internal'   },
+    { value: 'L2_Location_Unassigned',   label: 'L2 Location Unassigned',    cipStd: 'Internal'   },
   ],
+
+
   onboarding: [
     { value: 'Role_Assigned',                label: 'Role Assigned',               cipStd: 'CIP-004-7 R4' },
     { value: 'Authorization_Record_Created', label: 'Authorization Record Created', cipStd: 'CIP-004-7 R4' },
@@ -282,7 +291,7 @@ const EVENT_VOCAB = {
 // Context field config per domain: { label, fieldKey }
 // fieldKey must match the API field name in the audit trail object
 const CTX_CONFIG = {
-  role_mgmt:   { label: 'Role ID',      fieldKey: 'role_id'     },
+  role_mgmt:   { label: 'Role ID / SG ID', fieldKey: 'role_id' },
   onboarding:  { label: 'Employee ID',  fieldKey: 'employee_id' },
   offboarding: { label: 'Employee ID',  fieldKey: 'employee_id' },
   transfer:    { label: 'Employee ID',  fieldKey: 'employee_id' },
@@ -456,6 +465,7 @@ function flattenRecord(r) {
     event_source_system:   d.event_source_system?.value || d.event_source_system || '',
     source_ticket_id:      d.source_ticket_id || '',
     role_id:               d.role_id || '',
+    security_group_id:     d.security_group_id || '',
     role_name_snapshot:    d.role_name_snapshot || '',
     employee_id:           d.employee_id || '',
     employee_name:         d.employee_name || '',
@@ -589,6 +599,7 @@ function renderDetail(rec) {
     <div class="df"><span class="dl">Worker Type</span>${dv(rec.worker_type)}</div>
     <div class="df"><span class="dl">BES User Flag</span>${dv(rec.bes_user_flag)}</div>
     <div class="df"><span class="dl">Role ID</span>${dv(rec.role_id)}</div>
+    <div class="df"><span class="dl">Security Group ID</span>${dv(rec.security_group_id)}</div>
     <div class="df"><span class="dl">Role Name (snapshot)</span>${dv(rec.role_name_snapshot)}</div>
     <div class="df"><span class="dl">Department</span>${dv(rec.department)}</div>
 
