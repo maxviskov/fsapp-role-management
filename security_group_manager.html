@@ -249,6 +249,18 @@ const CFG = {
   pl2Obj:    37000019278,  // Physical_Location_Level_2 (L2)
   sgPalObj:  37000019280,  // SG_PAL_Assignment  junction
   sgL2Obj:   37000019281,  // SG_L2_Assignment   junction
+  auditObj:  37000019275,  // Compliance Audit Trail
+};
+
+// Event Type Master record IDs
+const EVT = {
+  SG_CREATED:           4,
+  SG_UPDATED:           5,
+  SG_DELETED:           6,
+  L1_LOCATION_ASSIGNED: 7,
+  L1_LOCATION_UNASSIGNED: 8,
+  L2_LOCATION_ASSIGNED: 9,
+  L2_LOCATION_UNASSIGNED: 10,
 };
 
 // ── Junction + child field names (exactly as in FS Object Fields) ──
@@ -284,6 +296,41 @@ async function fetchAll(objId) {
     page++;
   }
   return all;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  AUDIT TRAIL
+// ═══════════════════════════════════════════════════════════════════
+async function writeAudit(payload) {
+  if(!CFG.auditObj) return;
+  try {
+    const result = await POST(`/api/v2/objects/${CFG.auditObj}/records`, { data: payload });
+    console.log('[Audit] written:', result?.data?.bo_display_id, '| evt:', payload.event_type, '| sg:', payload.security_group_id);
+  } catch(e) {
+    console.error('[Audit] FAILED:', e.message, '| payload:', JSON.stringify(payload));
+    // If security_group_id field name is wrong, retry without it
+    if(e.message.includes('security_group_id') || e.message.includes('400')) {
+      try {
+        const { security_group_id, ...rest } = payload;
+        await POST(`/api/v2/objects/${CFG.auditObj}/records`, { data: rest });
+        console.warn('[Audit] written without security_group_id — check field API name');
+      } catch(e2) {
+        console.error('[Audit] retry also failed:', e2.message);
+      }
+    }
+  }
+}
+
+function buildAudit(eventTypeId, sg, extraFields = {}) {
+  const rec = {
+    audit_record_id:  'AUD-' + Date.now() + '-' + Math.random().toString(36).slice(2,7).toUpperCase(),
+    event_type:       parseInt(eventTypeId),
+    event_timestamp:  new Date().toISOString(),
+    security_group_id: sg?.security_group_id || sg?.bo_display_id?.toString() || '',
+  };
+  if(extraFields.previous_value) rec.previous_value = extraFields.previous_value;
+  if(extraFields.new_value)      rec.new_value      = extraFields.new_value;
+  return rec;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -595,54 +642,73 @@ async function saveTree(sgId) {
     return;
   }
 
+  // Get SG data for audit context
+  const sgData = sgRecs.find(s=>s.data.bo_display_id===sgId)?.data || {};
+
   let ok=0, fail=0;
 
   // Delete L1 junction records (cascade: also delete their L2 junctions)
   for(const [palId, juncId] of palDelete) {
-    // Find orphaned L2 junctions belonging to this L1
+    const palName = palRecs.find(p=>p.data.bo_display_id===parseInt(palId))?.data?.physical_access_location || palId;
     const orphanL2s = pl2Recs
       .filter(l=>lid(l.data[F.l2_parent])===parseInt(palId))
       .map(l=>l.data.bo_display_id);
     for(const l2Id of orphanL2s) {
       const jId = loadedL2[l2Id];
       if(jId) {
-        try{ await DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${jId}`); ok++; }
-        catch(e){ console.error('[saveTree] cascade delete L2 junc',jId,e.message); fail++; }
+        try{
+          await DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${jId}`);
+          ok++;
+        } catch(e){ console.error('[saveTree] cascade delete L2 junc',jId,e.message); fail++; }
       }
     }
-    try{ await DEL(`/api/v2/objects/${CFG.sgPalObj}/records/${juncId}`); ok++; }
-    catch(e){ console.error('[saveTree] delete L1 junc',juncId,e.message); fail++; }
+    try{
+      await DEL(`/api/v2/objects/${CFG.sgPalObj}/records/${juncId}`);
+      await writeAudit(buildAudit(EVT.L1_LOCATION_UNASSIGNED, sgData, {
+        previous_value: palName,
+      }));
+      ok++;
+    } catch(e){ console.error('[saveTree] delete L1 junc',juncId,e.message); fail++; }
   }
 
   // Create new L1 junction records
   for(const palId of palCreate) {
+    const palName = palRecs.find(p=>p.data.bo_display_id===palId)?.data?.physical_access_location || palId;
     try{
       await POST(`/api/v2/objects/${CFG.sgPalObj}/records`,{ data:{
         [F.sgPal_sg]:  sgId,
         [F.sgPal_pal]: palId,
       }});
+      await writeAudit(buildAudit(EVT.L1_LOCATION_ASSIGNED, sgData, {
+        new_value: palName,
+      }));
       ok++;
     } catch(e){ console.error('[saveTree] create L1 junc',palId,e.message); fail++; }
   }
 
-  // Delete removed L2 junction records (not already cascade-deleted above)
+  // Delete removed L2 junction records
   for(const [l2Id, juncId] of l2Delete) {
-    // Skip if already deleted via cascade
-    const stillExists = palAssign.find(r=>
-      lid(r.data[F.sgPal_sg])===sgId &&
-      pl2Recs.find(l=>l.data.bo_display_id===parseInt(l2Id) && !wantPAL.has(lid(l.data[F.l2_parent])))
-    );
-    try{ await DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${juncId}`); ok++; }
-    catch(e){ console.error('[saveTree] delete L2 junc',juncId,e.message); fail++; }
+    const l2Name = pl2Recs.find(l=>l.data.bo_display_id===parseInt(l2Id))?.data?.physical_location_level_2_id || l2Id;
+    try{
+      await DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${juncId}`);
+      await writeAudit(buildAudit(EVT.L2_LOCATION_UNASSIGNED, sgData, {
+        previous_value: l2Name,
+      }));
+      ok++;
+    } catch(e){ console.error('[saveTree] delete L2 junc',juncId,e.message); fail++; }
   }
 
   // Create new L2 junction records
   for(const l2Id of l2Create) {
+    const l2Name = pl2Recs.find(l=>l.data.bo_display_id===l2Id)?.data?.physical_location_level_2_id || l2Id;
     try{
       await POST(`/api/v2/objects/${CFG.sgL2Obj}/records`,{ data:{
         [F.sgL2_sg]: sgId,
         [F.sgL2_l2]: l2Id,
       }});
+      await writeAudit(buildAudit(EVT.L2_LOCATION_ASSIGNED, sgData, {
+        new_value: l2Name,
+      }));
       ok++;
     } catch(e){ console.error('[saveTree] create L2 junc',l2Id,e.message); fail++; }
   }
@@ -708,12 +774,20 @@ async function saveSG() {
 
   try {
     let newRecId = editSGId;
+    const snapOld = !isNew ? JSON.stringify(sgRecs.find(s=>s.data.bo_display_id===editSGId)?.data||{}) : null;
     if(isNew) {
       const res = await POST(`/api/v2/objects/${CFG.sgObj}/records`, payload);
       newRecId  = res?.data?.bo_display_id;
+      await writeAudit(buildAudit(EVT.SG_CREATED, { security_group_id: sgIdVal }, {
+        new_value: JSON.stringify(res?.data||data),
+      }));
       toast('Security Group created.','s');
     } else {
       await PUT(`/api/v2/objects/${CFG.sgObj}/records/${editSGId}`, payload);
+      await writeAudit(buildAudit(EVT.SG_UPDATED, { security_group_id: sgIdVal }, {
+        previous_value: snapOld,
+        new_value:      JSON.stringify(data),
+      }));
       toast('Security Group updated.','s');
     }
     closeM('mod-sg');
@@ -740,6 +814,7 @@ function confirmDeleteSG(recId) {
     `Permanently removes this Security Group and all its assignment records.${warn}`,
     async()=>{
       try{
+        const snapOld = JSON.stringify(d);
         const juncPAL = palAssign.filter(r=>lid(r.data[F.sgPal_sg])===recId);
         const juncL2  = l2Assign.filter(r=>lid(r.data[F.sgL2_sg])===recId);
         await Promise.all([
@@ -747,6 +822,7 @@ function confirmDeleteSG(recId) {
           ...juncL2.map(r=>DEL(`/api/v2/objects/${CFG.sgL2Obj}/records/${r.data.bo_display_id}`).catch(()=>{})),
         ]);
         await DEL(`/api/v2/objects/${CFG.sgObj}/records/${recId}`);
+        await writeAudit(buildAudit(EVT.SG_DELETED, d, { previous_value: snapOld }));
         toast('Deleted.','s');
         selSGId=null;
         await init();
