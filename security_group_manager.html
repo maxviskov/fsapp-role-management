@@ -106,7 +106,8 @@ header h1{font-size:14px;font-weight:500}
 .l2-row:hover{background:var(--sur)}
 .l2-chk{width:14px;height:14px;accent-color:var(--acc);flex-shrink:0;cursor:pointer}
 .l2-chk:disabled{cursor:not-allowed;opacity:.35}
-.l2-name{font-size:12px;flex:1}
+.l2-name{font-size:12px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l2-desc{font-size:11px;color:var(--muted);font-family:var(--mono);flex:1}
 .l2-no-children{padding:8px 13px 8px 38px;font-size:11px;color:var(--dim);border-top:1px solid var(--brd);font-family:var(--mono);font-style:italic}
 
 /* Save hint */
@@ -476,13 +477,15 @@ function buildTree(sgId, myPALMap, myL2Map) {
           const ld   = l.data;
           const l2Id = ld.bo_display_id;
           const l2Mine = l2Id in myL2Map;
-          return `<div class="l2-row">
+          const desc = ld.physiscal_location_level_2_description || '';
+        return `<div class="l2-row">
             <input type="checkbox" class="l2-chk" id="l2-${l2Id}" value="${l2Id}"
                    data-pal="${palId}"
                    ${l2Mine?'checked':''}
                    ${!isMine?'disabled':''}
                    onchange="markDirty()"/>
             <label for="l2-${l2Id}" class="l2-name" style="cursor:${isMine?'pointer':'default'}">${esc(ld.physical_location_level_2_id||'#'+l2Id)}</label>
+            ${desc?`<span class="l2-desc">${esc(desc)}</span>`:''}
           </div>`;
         }).join('')
       : `<div class="l2-no-children">No sub-locations defined</div>`;
