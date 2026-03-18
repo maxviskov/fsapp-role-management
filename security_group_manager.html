@@ -211,7 +211,7 @@ header h1{font-size:14px;font-weight:500}
           <input type="text" id="sg-f-name" placeholder="e.g. Control Center Operators"/>
         </div>
         <div class="ff fs">
-          <label>Description / Notes</label>
+          <label>Description</label>
           <textarea id="sg-f-notes" placeholder="Optional description of this security group…"></textarea>
         </div>
       </div>
@@ -411,7 +411,7 @@ function renderDetail(sgId) {
           <div class="si"><span class="sl">Name</span><span class="sv">${esc(d.security_group_name||'—')}</span></div>
           <div class="si"><span class="sl">L1 Locations</span><span class="sv">${l1Count}</span></div>
           <div class="si"><span class="sl">L2 Sub-locations</span><span class="sv">${l2Count}</span></div>
-          ${d.notes ? `<div class="si" style="grid-column:1/-1"><span class="sl">Notes</span><span class="sv-note">${esc(d.notes)}</span></div>` : ''}
+          ${d.security_group_description ? `<div class="si" style="grid-column:1/-1"><span class="sl">Description</span><span class="sv-note">${esc(d.security_group_description)}</span></div>` : ''}
         </div>
       </div>
     </div>
@@ -676,7 +676,7 @@ function openEditSG(recId) {
   document.getElementById('mod-sg-t').textContent='Edit Security Group';
   document.getElementById('sg-f-id').value   = d.security_group_id||'';
   document.getElementById('sg-f-name').value = d.security_group_name||'';
-  document.getElementById('sg-f-notes').value= d.notes||'';
+  document.getElementById('sg-f-notes').value= d.security_group_description||'';
   document.getElementById('sg-f-id').setAttribute('readonly','readonly');
   document.getElementById('mod-sg').style.display='flex';
 }
@@ -694,16 +694,16 @@ async function saveSG() {
   btn.disabled=true; btn.innerHTML='<span class="spn"></span> Saving…';
 
   const data = {
-    security_group_id:   sgIdVal,
-    security_group_name: sgName,
-    ...(sgNotes ? { notes: sgNotes } : {}),
+    security_group_id:          sgIdVal,
+    security_group_name:        sgName,
+    ...(sgNotes ? { security_group_description: sgNotes } : {}),
   };
 
   // Wrap lookups correctly for PUT
   const payload = isNew ? { data } : { data: {
-    security_group_id:   sgIdVal,
-    security_group_name: sgName,
-    ...(sgNotes ? { notes: sgNotes } : {}),
+    security_group_id:          sgIdVal,
+    security_group_name:        sgName,
+    ...(sgNotes ? { security_group_description: sgNotes } : {}),
   }};
 
   try {
