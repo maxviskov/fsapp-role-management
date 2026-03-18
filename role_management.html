@@ -14,12 +14,11 @@
       --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
       --r:6px;--t:150ms ease;
     }
-
     [data-theme="light"] {
-  --bg:#f0f2f7;--surface:#ffffff;--surface2:#e8ebf2;--border:#d0d6e8;
-  --text:#1a2035;--muted:#6272a4;--accent:#2563eb;--accent2:#059669;
-  --danger:#dc2626;--warn:#d97706;
-}
+      --bg:#f0f2f7;--surface:#ffffff;--surface2:#e8ebf2;--border:#d0d6e8;
+      --text:#1a2035;--muted:#6272a4;--accent:#2563eb;--accent2:#059669;
+      --danger:#dc2626;--warn:#d97706;
+    }
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;height:100vh;overflow:hidden}
     #app{display:flex;flex-direction:column;height:100vh}
@@ -52,11 +51,10 @@
     .rid{font-family:var(--mono);font-size:12px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
     .dy{background:var(--accent2)} .dn{background:var(--muted)}
-    /* Role status dot colours */
-    .ds-new{background:var(--accent)}          /* blue  */
-    .ds-review{background:var(--warn)}         /* orange */
-    .ds-active{background:var(--accent2)}      /* green */
-    .ds-inactive{background:var(--muted)}      /* grey  */
+    .ds-new{background:var(--accent)}
+    .ds-review{background:var(--warn)}
+    .ds-active{background:var(--accent2)}
+    .ds-inactive{background:var(--muted)}
     .pf{padding:9px 12px;border-top:1px solid var(--border)}
 
     /* RIGHT */
@@ -75,10 +73,22 @@
     .fl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
     .fv{font-family:var(--mono);font-size:13px}
 
+    /* COMPLIANCE CARD */
+    .cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:18px}
+    .cc-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px}
+    .cc-section{margin-bottom:14px}
+    .cc-section:last-child{margin-bottom:0}
+    .cc-section-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--border);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+    .cc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px}
+    .fv-na{font-family:var(--mono);font-size:12px;color:var(--border)}
+
     /* SECTION HEADER */
     .sh{display:flex;align-items:center;margin-bottom:11px;gap:10px}
     .sh h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);flex:1}
     .cb{background:var(--surface2);border:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);padding:2px 7px;border-radius:10px}
+
+    /* SECTION DIVIDER in modal */
+    .sec-div{grid-column:span 2;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
 
     /* TABLE */
     .tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
@@ -97,11 +107,11 @@
     .b-no{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
     .b-act{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
     .b-ina{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
-    /* Role_Status badges */
     .b-st-new{background:rgba(79,142,247,.15);color:var(--accent);border:1px solid rgba(79,142,247,.3)}
     .b-st-review{background:rgba(255,169,77,.15);color:var(--warn);border:1px solid rgba(255,169,77,.3)}
     .b-st-active{background:rgba(56,217,169,.1);color:#38d9a9;border:1px solid rgba(56,217,169,.2)}
     .b-st-inactive{background:rgba(122,138,170,.1);color:var(--muted);border:1px solid var(--border)}
+    .b-cip{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.2);font-size:9px}
 
     /* ROW ACTIONS */
     .ra{display:flex;gap:3px;opacity:0;transition:opacity var(--t)}
@@ -128,7 +138,8 @@
     .ov{position:fixed;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);animation:fi 120ms ease}
     @keyframes fi{from{opacity:0}to{opacity:1}}
     .mo{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:560px;max-height:88vh;display:flex;flex-direction:column;animation:su 150ms ease}
-    .mow{width:660px}
+    .mow{width:700px}
+    .mowl{width:780px}
     @keyframes su{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
     .moh{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
     .moh h3{font-size:14px;font-weight:600;flex:1}
@@ -140,7 +151,9 @@
 
     /* FORM */
     .fg2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
     .s2{grid-column:span 2}
+    .s3{grid-column:span 3}
     .ff{display:flex;flex-direction:column;gap:5px}
     .ff label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
     .ff label .req{color:var(--danger);margin-left:2px}
@@ -157,6 +170,14 @@
     .udi{padding:7px 10px;cursor:pointer;font-size:12px;transition:background var(--t)}
     .udi:hover{background:rgba(79,142,247,.15)}
     .ue{font-size:10px;color:var(--muted);font-family:var(--mono)}
+
+    /* AUDIT LOG PANEL */
+    .audit-strip{background:rgba(79,142,247,.04);border:1px solid rgba(79,142,247,.15);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .audit-strip .ai{font-size:10px;font-family:var(--mono);color:var(--muted);flex:1}
+    .audit-strip .as{font-size:10px;font-family:var(--mono)}
+    .audit-ok{color:var(--accent2)}
+    .audit-err{color:var(--danger)}
+    .audit-pend{color:var(--warn)}
 
     /* TOAST */
     #tc{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:2000}
@@ -178,6 +199,17 @@
     .yn-status{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;margin-left:6px}
     .yn-ok{color:var(--accent2);border:1px solid rgba(56,217,169,.3)}
     .yn-err{color:var(--danger);border:1px solid rgba(255,107,107,.3)}
+
+    /* NULL STRATEGY TOGGLE */
+    .ns-wrap{display:flex;align-items:center;gap:6px}
+    .ns-wrap label{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+    #nullStrategy{font-family:var(--mono);font-size:10px;background:var(--surface2);border:1px solid var(--border);color:var(--warn);border-radius:3px;padding:2px 6px;cursor:pointer;outline:none}
+
+    /* AUDIT OBJECT STATUS */
+    .aud-obj{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px}
+    .aud-obj-ok{color:var(--accent2);border:1px solid rgba(56,217,169,.3)}
+    .aud-obj-err{color:var(--danger);border:1px solid rgba(255,107,107,.3)}
+    .aud-obj-skip{color:var(--muted);border:1px solid var(--border)}
   </style>
 </head>
 <body>
@@ -188,6 +220,15 @@
     <div class="sp1"></div>
     <span id="hst"></span>
     <span id="yn-indicator"></span>
+    <span id="aud-indicator" class="aud-obj aud-obj-skip" title="Audit Trail object status">AUD: —</span>
+    <div class="ns-wrap" title="How blank Physical Access / Location is sent to API">
+      <label>null strat:</label>
+      <select id="nullStrategy">
+        <option value="omit" selected>omit field</option>
+        <option value="null">send null</option>
+        <option value="id-null">{ id: null }</option>
+      </select>
+    </div>
     <button class="btn bs" id="themeBtn" onclick="toggleTheme()" style="padding:5px 9px;font-size:13px">☀</button>
     <span class="env">DEV / BETA</span>
   </header>
@@ -224,7 +265,14 @@
           <button class="btn bd bsm" onclick="confirmDelMaster()">✕ Delete</button>
         </div>
         <div class="db">
+          <!-- Core info card -->
           <div class="mc" id="mcard"></div>
+          <!-- Compliance fields card -->
+          <div class="cc" id="ccard">
+            <div class="cc-title">⚖ Compliance Classification</div>
+            <div id="cc-grid"></div>
+          </div>
+          <!-- Entitlements -->
           <div class="sh">
             <h3>Entitlements</h3>
             <span class="cb" id="ecnt">—</span>
@@ -235,9 +283,10 @@
               <thead><tr>
                 <th>Job Profile ID</th><th>Type</th><th>Item</th>
                 <th>Physical Access</th><th>Location</th><th>BES</th>
+                <th>CIP Std</th><th>Scope</th>
                 <th>Prov. Owner</th><th>Appr. Owner</th><th></th>
               </tr></thead>
-              <tbody id="etb"><tr class="lrow"><td colspan="9">Select a role to load entitlements</td></tr></tbody>
+              <tbody id="etb"><tr class="lrow"><td colspan="11">Select a role to load entitlements</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -247,17 +296,22 @@
 </div>
 <div id="tc"></div>
 
-<!-- MODAL: Role Master -->
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: Role Master
+     ══════════════════════════════════════════════════════════ -->
 <div id="modM" class="ov" style="display:none">
-  <div class="mo">
+  <div class="mo mowl">
     <div class="moh"><h3 id="modMT">New Role</h3><span class="msub" id="modMS"></span><button class="btn bg" onclick="closeM('modM')" style="padding:4px 8px">✕</button></div>
     <div class="mob">
       <div class="fg2">
-        <div class="ff s2">
+
+        <!-- ── Core identity ── -->
+        <div class="sec-div s2">Core Identity</div>
+        <div class="ff">
           <label>Role ID <span class="req">*</span></label>
           <input type="text" id="mf_rid" placeholder="e.g. 100102"/>
         </div>
-        <div class="ff s2">
+        <div class="ff">
           <label>Role Name <span class="req">*</span></label>
           <input type="text" id="mf_rname" placeholder="e.g. System Administrator"/>
         </div>
@@ -272,6 +326,44 @@
           <label>Last Changed <span class="req">*</span></label>
           <input type="datetime-local" id="mf_lc"/>
         </div>
+
+        <!-- ── Compliance classification ── -->
+        <div class="sec-div s2">Compliance Classification</div>
+        <div class="ff">
+          <label>NERC CIP Standard</label>
+          <input type="text" id="mf_cip" placeholder="e.g. CIP-004-7"/>
+        </div>
+        <div class="ff">
+          <label>Revocation Window (hours)</label>
+          <input type="number" id="mf_rwh" placeholder="e.g. 24"/>
+        </div>
+        <div class="ff">
+          <label>Requires PRA Background Check</label>
+          <select id="mf_pra">
+            <option value="">— not set —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Physical Revocation Window (hours)</label>
+          <input type="number" id="mf_prwh" placeholder="e.g. 24"/>
+        </div>
+
+        <!-- ── Lifecycle ── -->
+        <div class="sec-div s2">Lifecycle</div>
+        <div class="ff">
+          <label>Role Effective Date</label>
+          <input type="date" id="mf_eff"/>
+        </div>
+        <div class="ff">
+          <label>Role Expiry Date</label>
+          <input type="date" id="mf_exp"/>
+        </div>
+        <div class="ff">
+          <label>Next Review Date</label>
+          <input type="date" id="mf_nrd"/>
+        </div>
       </div>
     </div>
     <div class="mof">
@@ -281,12 +373,17 @@
   </div>
 </div>
 
-<!-- MODAL: Entitlement -->
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: Entitlement
+     ══════════════════════════════════════════════════════════ -->
 <div id="modE" class="ov" style="display:none">
-  <div class="mo mow">
+  <div class="mo mowl">
     <div class="moh"><h3 id="modET">New Entitlement</h3><span class="msub" id="modES"></span><button class="btn bg" onclick="closeM('modE')" style="padding:4px 8px">✕</button></div>
     <div class="mob">
       <div class="fg2">
+
+        <!-- ── Core entitlement fields ── -->
+        <div class="sec-div s2">Entitlement</div>
         <div class="ff">
           <label>Workday Job Profile ID <span class="req">*</span></label>
           <input type="text" id="ef_jp" readonly/>
@@ -413,6 +510,78 @@
           <label>Entitlement Justification <span class="req">*</span></label>
           <textarea id="ef_notes" placeholder="Reason this entitlement is required…"></textarea>
         </div>
+
+        <!-- ── Compliance fields ── -->
+        <div class="sec-div s2">Compliance & Classification</div>
+        <div class="ff">
+          <label>CIP Standard</label>
+          <input type="text" id="ef_cip" placeholder="e.g. CIP-007-6 R5.1"/>
+          <span class="hint">Required when BES = Yes</span>
+        </div>
+        <div class="ff">
+          <label>System Scope</label>
+          <select id="ef_scope">
+            <option value="">— not set —</option>
+            <option value="ems">EMS-Only</option>
+            <option value="corp">Corporate-Only</option>
+            <option value="dual">Dual-Access</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Requires CATS Web Ticket</label>
+          <select id="ef_cats">
+            <option value="">— not set —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Entitlement Risk Level</label>
+          <select id="ef_risk">
+            <option value="">— not set —</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+
+        <!-- ── RFC & change tracking ── -->
+        <div class="sec-div s2">RFC & Change Tracking</div>
+        <div class="ff">
+          <label>RFC Required</label>
+          <select id="ef_rfcreq">
+            <option value="">— not set —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+          <span class="hint">Set Yes for all BES/BCSI</span>
+        </div>
+        <div class="ff">
+          <label>Effective Date</label>
+          <input type="date" id="ef_effdt"/>
+        </div>
+        <div class="ff">
+          <label>Expiry Date</label>
+          <input type="date" id="ef_expdt"/>
+        </div>
+
+        <!-- ── Design-time approval (Audit fields) ── -->
+        <div class="sec-div s2">Design-Time Approval</div>
+        <div class="ff">
+          <label>Approved By</label>
+          <div class="uw">
+            <input type="text" id="ef_apbt" placeholder="Type name or email…" oninput="filterU('ef_apbt','ef_apbi','ef_apbd')" autocomplete="off"/>
+            <div id="ef_apbd" class="udd" style="display:none"></div>
+          </div>
+          <input type="hidden" id="ef_apbi"/>
+          <span class="hint">Design-time authorizer (distinct from Approval Owner)</span>
+        </div>
+        <div class="ff">
+          <label>Approval Date</label>
+          <input type="datetime-local" id="ef_appdt"/>
+        </div>
+
       </div>
     </div>
     <div class="mof">
@@ -441,27 +610,31 @@
 // ⚠️ FRESHSERVICE LOOKUP FIELD QUIRK:
 // POST (create) → bare integer:  is_active: 1
 // PUT  (update) → id object:     is_active: { id: 1 }
-// Applies to ALL lookup fields: is_active, is_bes, entitlement_type,
-// entitlement_is_bes, physical_access, provisioning_owner, approval_owner, etc.
+// Applies to ALL lookup fields universally.
 const CFG = {
   domain:    'velco-betabox.freshservice.com',
-  apiKey:    'uloskM4yZXvLPVUdOxyD',   // 🔑 replace before production
+  apiKey:    'uloskM4yZXvLPVUdOxyD',
   masterObj: 37000019240,
   entObj:    37000019214,
   yesNoObj:  37000019262,
-  statusObj: 37000019266,              // Role_Status lookup object
-  // Resolved at runtime by loadYesNo():
-  yesId: null,   // internal record ID for "Yes"
-  noId:  null,   // internal record ID for "No"
+  auditObj:  null,   // resolved at boot from AUDIT_OBJ_ID constant below
+  yesId: null,
+  noId:  null,
 };
-// Role_Status record IDs (hardcoded — confirmed from object 37000019266)
+
+// ── Audit Trail Object ID ──────────────────────────────────────────────────
+// Once you create the Compliance Audit Trail custom object in Freshservice,
+// paste its object ID here. Set to null to disable audit writing (POC mode).
+const AUDIT_OBJ_ID = 37000019275;
+
+// Role_Status record IDs (confirmed from object 37000019266)
 const ROLE_STATUS = {
-  1: { label: 'New',      cls: 'b-st-new',      dot: 'ds-new'      },
-  2: { label: 'In Review',cls: 'b-st-review',   dot: 'ds-review'   },
-  3: { label: 'Active',   cls: 'b-st-active',   dot: 'ds-active'   },
-  4: { label: 'Inactive', cls: 'b-st-inactive', dot: 'ds-inactive' },
+  1: { label: 'New',       cls: 'b-st-new',      dot: 'ds-new'      },
+  2: { label: 'In Review', cls: 'b-st-review',   dot: 'ds-review'   },
+  3: { label: 'Active',    cls: 'b-st-active',   dot: 'ds-active'   },
+  4: { label: 'Inactive',  cls: 'b-st-inactive', dot: 'ds-inactive' },
 };
-const STATUS_NEW_ID = 1; // default for new roles
+const STATUS_NEW_ID = 1;
 const BASE = 'https://' + CFG.domain;
 const HDR  = { Authorization: 'Basic ' + btoa(CFG.apiKey + ':X'), 'Content-Type': 'application/json' };
 
@@ -488,7 +661,6 @@ const LOC = {
 
 function lk(map, id) { return id != null ? (map[id] || map[String(id)] || `#${id}`) : '—'; }
 
-// Resolve role_status from API data — handles both {id,value} and bare integer
 function resolveStatus(statusField) {
   if (!statusField) return ROLE_STATUS[STATUS_NEW_ID];
   const id = statusField.id ?? statusField;
@@ -500,6 +672,8 @@ function resolveStatus(statusField) {
 // ═══════════════════════════════════════════
 let allRoles=[], filtRoles=[], selRole=null;
 let editMId=null, editEId=null, allUsers=[];
+// Track last saved entitlement for audit context
+let _lastEntCtx = null;
 
 // ═══════════════════════════════════════════
 //  API HELPERS
@@ -510,7 +684,7 @@ const PUT  = async (p,b) => { const r=await fetch(BASE+p,{method:'PUT', headers:
 const DEL  = async p => { const r=await fetch(BASE+p,{method:'DELETE',headers:HDR}); if(!r.ok) throw new Error(`DELETE ${p} → ${r.status}`); };
 
 // ═══════════════════════════════════════════
-//  YES/NO LOOKUP — load real IDs at boot
+//  YES/NO LOOKUP
 // ═══════════════════════════════════════════
 async function loadYesNo() {
   const d = await GET(`/api/v2/objects/${CFG.yesNoObj}/records?page_size=10`);
@@ -520,7 +694,7 @@ async function loadYesNo() {
     if (v === 'yes') CFG.yesId = r.data.bo_display_id;
     if (v === 'no')  CFG.noId  = r.data.bo_display_id;
   });
-  console.log('[YesNo] yesId=', CFG.yesId, 'noId=', CFG.noId, '| raw:', JSON.stringify(recs.map(r=>r.data)));
+  console.log('[YesNo] yesId=', CFG.yesId, 'noId=', CFG.noId);
   const ind = document.getElementById('yn-indicator');
   if (CFG.yesId && CFG.noId) {
     ind.className = 'yn-status yn-ok';
@@ -528,34 +702,159 @@ async function loadYesNo() {
   } else {
     ind.className = 'yn-status yn-err';
     ind.textContent = 'Y/N: failed';
-    throw new Error(`Yes/No lookup IDs not resolved (yes=${CFG.yesId}, no=${CFG.noId}). Check object ${CFG.yesNoObj}.`);
+    throw new Error(`Yes/No IDs not resolved. Check object ${CFG.yesNoObj}.`);
   }
 }
 
-// Helper: resolve "yes"/"no" string to the real lookup ID
 function ynObj(val) {
   const v = String(val).toLowerCase().trim();
   const isYes = (v === 'yes' || v === '1');
   return { id: isYes ? CFG.yesId : CFG.noId, value: isYes ? 'Yes' : 'No' };
 }
 
-// Helper: resolve "yes"/"no" string to the real lookup ID
 function ynId(val) {
   const v = String(val).toLowerCase().trim();
   if (v === 'yes' || v === '1') return CFG.yesId;
   if (v === 'no'  || v === '2') return CFG.noId;
-  return CFG.noId; // safe default
+  return CFG.noId;
 }
+
+// ─── OPTIONAL LOOKUP FIELD HELPERS ──────────────────────────────────────────
+const OMIT = Symbol('omit');
+function getNullStrategy(){ return document.getElementById('nullStrategy').value; }
+function optionalLookup(rawId, isNew){
+  if(rawId) return isNew ? parseInt(rawId) : { id: parseInt(rawId) };
+  switch(getNullStrategy()){
+    case 'null':    return null;
+    case 'id-null': return { id: null };
+    default:        return OMIT;
+  }
+}
+function applyOptional(data, key, val){ if(val !== OMIT) data[key] = val; }
+
+// ─── OPTIONAL YES/NO FIELD (blank = omit) ────────────────────────────────────
+function applyYesNoOpt(data, key, val, isNew) {
+  if (!val) return; // blank select → omit
+  const id = ynId(val);
+  data[key] = isNew ? id : { id };
+}
+
+// ═══════════════════════════════════════════
+//  AUDIT TRAIL HELPERS
+// ═══════════════════════════════════════════
+function initAuditObjId() {
+  CFG.auditObj = AUDIT_OBJ_ID;
+  const el = document.getElementById('aud-indicator');
+  if (CFG.auditObj) {
+    el.className = 'aud-obj aud-obj-ok';
+    el.textContent = `AUD: ${CFG.auditObj}`;
+  } else {
+    el.className = 'aud-obj aud-obj-skip';
+    el.textContent = 'AUD: disabled';
+    console.log('[Audit] AUDIT_OBJ_ID not set — audit writing disabled. Set AUDIT_OBJ_ID once object is created.');
+  }
+}
+
+// Write one audit record; never throws — logs failure, shows toast in err.
+async function writeAudit(payload) {
+  if (!CFG.auditObj) {
+    console.log('[Audit] skipped (no auditObj):', payload);
+    return null;
+  }
+  try {
+    const result = await POST(`/api/v2/objects/${CFG.auditObj}/records`, { data: payload });
+    console.log('[Audit] written:', result?.data?.bo_display_id, '| event:', payload.event_type);
+    return result;
+  } catch(e) {
+    console.error('[Audit] write failed:', e.message, '| payload:', JSON.stringify(payload));
+    toast('Audit write failed: ' + e.message, 'e');
+    return null;
+  }
+}
+
+// Build a base audit record with Section 1 (record identity) fields
+// source_ticket_id: FS ticket or Journey ID if available (pass '' if none)
+// POC audit object has: Audit_Record_ID (auto), Event_Timestamp, Role_ID, Event_Type, Badge_Disabled_At, Created_By_Agent_ID
+// Only send event_type + event_timestamp in base — role_id added by callers
+function baseAudit(eventTypeId) {
+  return {
+    audit_record_id: 'AUD-' + Date.now() + '-' + Math.random().toString(36).slice(2,7).toUpperCase(),
+    event_type:      parseInt(eventTypeId),
+    event_timestamp: new Date().toISOString(),
+  };
+}
+
+// Build a Role Mgmt audit record — POC fields only
+// Fields: Audit_Record_ID, Event_Timestamp, Role_ID, Event_Type, Previous_Value, New_Value
+function buildRoleAudit(eventTypeId, roleData, extraFields = {}) {
+  const d = roleData || {};
+  const rec = { ...baseAudit(eventTypeId) };
+  setIfVal(rec, 'role_id',        d.role_id);
+  setIfVal(rec, 'previous_value', extraFields.previous_value);
+  setIfVal(rec, 'new_value',      extraFields.new_value);
+  if (extraFields._extra) Object.assign(rec, extraFields._extra);
+  return rec;
+}
+
+// Build an Entitlement audit record — POC fields only
+// Fields: Audit_Record_ID, Event_Timestamp, Role_ID, Event_Type, Previous_Value, New_Value
+function buildEntAudit(eventTypeId, entData, roleId, isBesRole, extraFields = {}) {
+  const rec = { ...baseAudit(eventTypeId) };
+  setIfVal(rec, 'role_id',        roleId);
+  setIfVal(rec, 'previous_value', extraFields.previous_value);
+  setIfVal(rec, 'new_value',      extraFields.new_value);
+  if (extraFields._extra) Object.assign(rec, extraFields._extra);
+  return rec;
+}
+
+// Only add a key to the object if the value is non-empty
+function setIfVal(obj, key, val) {
+  if (val !== undefined && val !== null && val !== '' && val !== 0) obj[key] = val;
+}
+
+// Human-readable summary of an entitlement (used in new_value / previous_value)
+function describeEnt(d) {
+  const parts = [];
+  if (d.entitlement_type?.value) parts.push(d.entitlement_type.value);
+  if (d.entitlement_item?.value) parts.push(d.entitlement_item.value);
+  if (d.physical_access?.value)  parts.push('PA: ' + d.physical_access.value);
+  if (d.location?.value)         parts.push('Loc: ' + d.location.value);
+  return parts.join(' | ') || 'Entitlement record';
+}
+
+// ── Event Type Master IDs ────────────────────────────────────────────────────
+// These must match the record IDs in the Event Type Master custom object.
+// Hardcode once confirmed from the FS Event_Type_Master object records.
+// From the image: 1=Role_Definition_Changed, 2=Entitlement_Added, 3=Entitlement_Removed
+const EVT = {
+  ROLE_DEF_CHANGED:    1,
+  ENT_ADDED:           2,
+  ENT_REMOVED:         3,
+};
+
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
 async function init() {
   setSt('Loading…');
+  initAuditObjId();
   try {
-    await Promise.all([loadUsers(), loadServiceItems(), loadYesNo()]);
-    setSt('');
+    // loadUsers and loadServiceItems are already non-fatal internally
+    // loadYesNo wrapped in allSettled so a failure doesn't block loadMasters
+    const [,, ynResult] = await Promise.allSettled([loadUsers(), loadServiceItems(), loadYesNo()]);
+    if (ynResult.status === 'rejected') {
+      setSt('Y/N lookup failed: ' + ynResult.reason?.message, true);
+      toast('Y/N lookup failed — saves may not work', 'e');
+    } else {
+      setSt('');
+    }
     await loadMasters();
-  } catch(e) { setSt(e.message, true); toast(e.message,'e'); }
+  } catch(e) {
+    setSt(e.message, true);
+    toast(e.message, 'e');
+    document.getElementById('rlist').innerHTML =
+      `<div class="empty"><p style="color:#ff6b6b;font-size:11px;font-family:var(--mono)">${e.message}</p></div>`;
+  }
 }
 
 function setSt(m,e=false){ const el=document.getElementById('hst'); el.textContent=m; el.style.color=e?'#ff6b6b':'var(--muted)'; }
@@ -589,7 +888,10 @@ async function loadMasters() {
   el.innerHTML='<div class="empty"><p style="font-size:11px;font-family:var(--mono)">Loading…</p></div>';
   try {
     const d=await GET(`/api/v2/objects/${CFG.masterObj}/records?page_size=100`);
-    allRoles=d.records||[]; filtRoles=[...allRoles]; renderList();
+    allRoles=d.records||[];
+    allRoles.sort((a, b) => (a.data?.role_id || '').localeCompare(b.data?.role_id || '', undefined, { numeric: true }));
+    filtRoles=[...allRoles];
+    renderList();
   } catch(e){ el.innerHTML=`<div class="empty"><p style="color:#ff6b6b;font-size:11px;font-family:var(--mono)">${e.message}</p></div>`; toast(e.message,'e'); }
 }
 
@@ -607,7 +909,13 @@ function renderList() {
   }).join('');
 }
 
-function filterRoles(q){ const lq=q.toLowerCase(); filtRoles=allRoles.filter(r=>(r.data?.role_id||'').toLowerCase().includes(lq)); renderList(); }
+function filterRoles(q){
+  const lq=q.toLowerCase();
+  filtRoles=allRoles
+    .filter(r=>(r.data?.role_id||'').toLowerCase().includes(lq))
+    .sort((a, b) => (a.data?.role_id || '').localeCompare(b.data?.role_id || '', undefined, { numeric: true }));
+  renderList();
+}
 
 async function selectRole(id) {
   selRole=allRoles.find(r=>String(r.data.bo_display_id)===String(id));
@@ -617,11 +925,13 @@ async function selectRole(id) {
   const st=resolveStatus(d.role_status);
   const bv=d.is_bes?.value||'—';
   const lc=d.role_last_changed?new Date(d.role_last_changed).toLocaleString():'—';
+
   document.getElementById('nosel').style.display='none';
   document.getElementById('detail').style.display='flex';
   document.getElementById('dtitle').textContent=d.role_id||'—';
-  document.getElementById('dname').textContent = d.role_name || '—';
+  document.getElementById('dname').textContent=d.role_name||'—';
   document.getElementById('dmeta').textContent=`Last changed: ${lc}  ·  Record ID: ${selRole.data.bo_display_id}`;
+
   document.getElementById('mcard').innerHTML=`
     <div class="fg"><span class="fl">Role ID</span><span class="fv" style="color:var(--accent)">${d.role_id||'—'}</span></div>
     <div class="fg"><span class="fl">Role Name</span><span class="fv" style="color:var(--accent)">${d.role_name||'—'}</span></div>
@@ -629,7 +939,57 @@ async function selectRole(id) {
     <div class="fg"><span class="fl">BES</span><span class="badge ${bv.toLowerCase()==='yes'?'b-yes':'b-no'}">${bv}</span></div>
     <div class="fg"><span class="fl">Last Changed</span><span class="fv">${lc}</span></div>
     <div class="fg"><span class="fl">Record ID</span><span class="fv" style="font-size:11px;color:var(--muted)">${selRole.data.bo_display_id}</span></div>`;
+
+  // Build compliance card — always visible, dash for unpopulated fields
+  const na = `<span class="fv-na">—</span>`;
+  const praV = d.requires_pra_background_check?.value;
+  const createdBy = d.created_by?.value || null;
+  const createdDt = d.created_date ? fmtDateTime(d.created_date) : null;
+
+  const ccSections = [
+    {
+      label: 'Classification',
+      fields: [
+        { l: 'NERC CIP Std',     v: d.nerc_cip_standard ? `<span class="badge b-cip">${d.nerc_cip_standard}</span>` : na },
+        { l: 'Revoc. Window',    v: d.revocation_window_hours    != null ? `<span class="fv">${d.revocation_window_hours}h</span>`         : na },
+        { l: 'Phys. Revoc.',     v: d.physical_revocation_window_hours != null ? `<span class="fv">${d.physical_revocation_window_hours}h</span>` : na },
+        { l: 'PRA Required',     v: praV ? `<span class="badge ${praV.toLowerCase()==='yes'?'b-yes':'b-no'}">${praV}</span>` : na },
+      ]
+    },
+    {
+      label: 'Lifecycle',
+      fields: [
+        { l: 'Effective Date',   v: d.role_effective_date ? `<span class="fv">${fmtDate(d.role_effective_date)}</span>`                          : na },
+        { l: 'Expiry Date',      v: d.role_expiry_date    ? `<span class="fv" style="color:var(--warn)">${fmtDate(d.role_expiry_date)}</span>`    : na },
+        { l: 'Next Review',      v: d.next_review_date    ? `<span class="fv">${fmtDate(d.next_review_date)}</span>`                              : na },
+      ]
+    },
+    {
+      label: 'Authorship',
+      fields: [
+        { l: 'Created By',       v: createdBy ? `<span class="fv" style="font-size:11px">${sName(createdBy)}</span>` : na },
+        { l: 'Created Date',     v: createdDt ? `<span class="fv" style="font-size:11px">${createdDt}</span>`        : na },
+      ]
+    },
+  ];
+
+  document.getElementById('cc-grid').innerHTML = ccSections.map(s => `
+    <div class="cc-section" style="grid-column:1/-1">
+      <div class="cc-section-label">${s.label}</div>
+      <div class="cc-grid">${s.fields.map(f=>`<div class="fg"><span class="fl">${f.l}</span>${f.v}</div>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('ccard').style.display = '';
+
   await loadEnts(d.role_id);
+}
+
+function fmtDate(v) {
+  if (!v) return '—';
+  try { return new Date(v).toLocaleDateString(); } catch { return v; }
+}
+function fmtDateTime(v) {
+  if (!v) return '—';
+  try { return new Date(v).toLocaleString(undefined, {dateStyle:'short', timeStyle:'short'}); } catch { return v; }
 }
 
 // ═══════════════════════════════════════════
@@ -639,9 +999,9 @@ function openNewMaster() {
   editMId=null;
   set('modMT','New Role'); set('modMS','');
   document.getElementById('mf_rid').readOnly=false;
-  document.getElementById('mf_rid').value='';
-  document.getElementById('mf_rname').value='';
+  ['mf_rid','mf_rname','mf_cip','mf_rwh','mf_prwh','mf_eff','mf_exp','mf_nrd'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('mf_bes').value='no';
+  document.getElementById('mf_pra').value='';
   document.getElementById('mf_lc').value=nowLocal();
   show('modM');
 }
@@ -656,38 +1016,81 @@ function openEditMaster() {
   document.getElementById('mf_bes').value=(d.is_bes?.value||'No').toLowerCase();
   document.getElementById('mf_rname').value=d.role_name||'';
   document.getElementById('mf_lc').value=d.role_last_changed?new Date(d.role_last_changed).toISOString().slice(0,16):nowLocal();
+  // Compliance fields
+  document.getElementById('mf_cip').value=d.nerc_cip_standard||'';
+  document.getElementById('mf_rwh').value=d.revocation_window_hours!=null?d.revocation_window_hours:'';
+  document.getElementById('mf_prwh').value=d.physical_revocation_window_hours!=null?d.physical_revocation_window_hours:'';
+  document.getElementById('mf_pra').value=d.requires_pra_background_check?.value?(d.requires_pra_background_check.value.toLowerCase()):'';
+  document.getElementById('mf_eff').value=d.role_effective_date?d.role_effective_date.slice(0,10):'';
+  document.getElementById('mf_exp').value=d.role_expiry_date?d.role_expiry_date.slice(0,10):'';
+  document.getElementById('mf_nrd').value=d.next_review_date?d.next_review_date.slice(0,10):'';
   show('modM');
 }
 
 async function saveMaster() {
-  const rid   = document.getElementById('mf_rid').value.trim();
-  const besVal= document.getElementById('mf_bes').value;  // "yes" or "no"
-  const lc    = document.getElementById('mf_lc').value;
-  const rname = document.getElementById('mf_rname').value.trim();
+  const rid    = document.getElementById('mf_rid').value.trim();
+  const besVal = document.getElementById('mf_bes').value;
+  const lc     = document.getElementById('mf_lc').value;
+  const rname  = document.getElementById('mf_rname').value.trim();
+  const cipStd = document.getElementById('mf_cip').value.trim();
+  const rwh    = document.getElementById('mf_rwh').value;
+  const prwh   = document.getElementById('mf_prwh').value;
+  const praVal = document.getElementById('mf_pra').value;
+  const eff    = document.getElementById('mf_eff').value;
+  const exp    = document.getElementById('mf_exp').value;
+  const nrd    = document.getElementById('mf_nrd').value;
+
   if(!rid){ toast('Role ID is required','e'); return; }
   if(!rname){ toast('Role Name is required','e'); return; }
   if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
-  
-  const isNew = !editMId;
-  const payload={ data:{
-    role_id:          rid,
-    role_name:        rname,
-    // role_status: set to "New" on create; omitted on edit (Workflow Automator owns this field)
-    ...(isNew ? { role_status: STATUS_NEW_ID } : {}),
-    is_bes:    isNew ? ynId(besVal) : { id: ynId(besVal) },
-    role_last_changed: lc ? new Date(lc).toISOString() : new Date().toISOString()
-  }};
 
-  console.log('[saveMaster] payload:', JSON.stringify(payload));
+  const isNew = !editMId;
+
+  // Snapshot old data for audit diff (before save)
+  const oldData = editMId ? (selRole?.data || {}) : null;
+
+  const data = {
+    role_id:           rid,
+    role_name:         rname,
+    ...(isNew ? { role_status: STATUS_NEW_ID } : {}),
+    is_bes:            isNew ? ynId(besVal) : { id: ynId(besVal) },
+    role_last_changed: lc ? new Date(lc).toISOString() : new Date().toISOString(),
+  };
+
+  // Optional text / number fields
+  if (cipStd)           data.nerc_cip_standard = cipStd;
+  if (rwh !== '')       data.revocation_window_hours = parseInt(rwh);
+  if (prwh !== '')      data.physical_revocation_window_hours = parseInt(prwh);
+  if (eff)              data.role_effective_date = eff;
+  if (exp)              data.role_expiry_date = exp;
+  if (nrd)              data.next_review_date = nrd;
+
+  // Optional Yes/No lookup fields
+  applyYesNoOpt(data, 'requires_pra_background_check', praVal, isNew);
+
+  console.log('[saveMaster] payload:', JSON.stringify({ data }));
   busy('btnMS',true);
   try {
-    if(editMId){
-      await PUT(`/api/v2/objects/${CFG.masterObj}/records/${editMId}`, payload);
+    let savedData;
+    if (editMId) {
+      const res = await PUT(`/api/v2/objects/${CFG.masterObj}/records/${editMId}`, { data });
+      savedData = res?.data || data;
       toast('Role updated','s');
     } else {
-      await POST(`/api/v2/objects/${CFG.masterObj}/records`, payload);
+      const res = await POST(`/api/v2/objects/${CFG.masterObj}/records`, { data });
+      savedData = res?.data || data;
       toast('Role created','s');
     }
+
+    // ── Write audit record for Role_Definition_Changed ──────────────────────
+    // Only on edit (create goes through Role_Assigned / onboarding journey)
+    if (!isNew && CFG.auditObj) {
+      await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, { ...oldData, ...savedData }, {
+        previous_value: JSON.stringify(oldData, null, 0),
+        new_value:      JSON.stringify(savedData, null, 0),
+      }));
+    }
+
     closeM('modM');
     await loadMasters();
     if(editMId){
@@ -698,11 +1101,24 @@ async function saveMaster() {
   finally{ busy('btnMS',false); }
 }
 
+// Build a diff string showing changed fields
+function buildDiff(newObj, oldObj, fields) {
+  if (!oldObj) return '';
+  const parts = [];
+  fields.forEach(f => {
+    const nv = newObj[f]; const ov = oldObj[f];
+    if (nv !== undefined && String(nv) !== String(ov || '')) {
+      parts.push(`${f}: "${ov || ''}" → "${nv}"`);
+    }
+  });
+  return parts.join('; ') || 'No tracked field changes';
+}
+
 function confirmDelMaster() {
   if(!selRole) return;
   const rid=selRole.data?.role_id||selRole.data.bo_display_id;
   confirm_(`Delete Role "${rid}"?`,
-    `Permanently removes this Role Master record.<br><strong>Entitlements for this role are NOT auto-deleted.</strong>`,
+    `Permanently removes this Role Master record.<br><strong>Entitlements are NOT auto-deleted.</strong>`,
     async()=>{
       try{
         await DEL(`/api/v2/objects/${CFG.masterObj}/records/${selRole.data.bo_display_id}`);
@@ -718,22 +1134,16 @@ function confirmDelMaster() {
 async function cloneRole() {
   if(!selRole) return;
   if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
-  const d=selRole.data||{}, ts=new Date().toTimeString().slice(0,5).replace(':','');
-
-  // Preserve BES from source record using its resolved id
-  const srcBesId = d.is_bes?.id || CFG.noId;
-
+  const d=selRole.data||{};
   const payload={ data:{
-    is_active: CFG.noId,                  // 2
-    is_bes:    d.is_bes?.id || CFG.noId,  // preserve from source
+    is_bes: d.is_bes?.id || CFG.noId,
   }};
-
   console.log('[cloneRole] payload:', JSON.stringify(payload));
   try{
     await POST(`/api/v2/objects/${CFG.masterObj}/records`, payload);
-    toast(`Cloned as ${payload.data.role_id} (inactive)`,'s');
+    toast(`Cloned (inactive)`,'s');
     await loadMasters();
-  } catch(e){ toast('Clone failed: '+e.message,'e'); console.error('[cloneRole] error:', e.message); }
+  } catch(e){ toast('Clone failed: '+e.message,'e'); }
 }
 
 // ═══════════════════════════════════════════
@@ -741,7 +1151,7 @@ async function cloneRole() {
 // ═══════════════════════════════════════════
 async function loadEnts(roleId) {
   const tb=document.getElementById('etb');
-  tb.innerHTML='<tr class="lrow"><td colspan="9"><span class="spn"></span> Loading…</td></tr>';
+  tb.innerHTML='<tr class="lrow"><td colspan="11"><span class="spn"></span> Loading…</td></tr>';
   document.getElementById('ecnt').textContent='…';
   try {
     const enc=encodeURIComponent(`workday_job_profile_id : '${roleId}'`);
@@ -749,14 +1159,16 @@ async function loadEnts(roleId) {
     const recs=d.records||[];
     document.getElementById('ecnt').textContent=recs.length;
     renderEnts(recs); tb._r=recs;
-  } catch(e){ tb.innerHTML=`<tr class="lrow"><td colspan="9" style="color:#ff6b6b">${e.message}</td></tr>`; toast(e.message,'e'); }
+  } catch(e){ tb.innerHTML=`<tr class="lrow"><td colspan="11" style="color:#ff6b6b">${e.message}</td></tr>`; toast(e.message,'e'); }
 }
 
 function renderEnts(recs) {
   const tb=document.getElementById('etb');
-  if(!recs.length){ tb.innerHTML='<tr class="lrow"><td colspan="9">No entitlements for this role</td></tr>'; return; }
+  if(!recs.length){ tb.innerHTML='<tr class="lrow"><td colspan="11">No entitlements for this role</td></tr>'; return; }
   tb.innerHTML=recs.map(r=>{
     const d=r.data||{}, bv=d.entitlement_is_bes?.value||'—', isBes=bv.toLowerCase()==='yes';
+    const cipStd=d.entitlement_cip_standard||'';
+    const scope=d.entitlement_system_scope||'';
     return `<tr>
       <td class="mono">${d.workday_job_profile_id||'—'}</td>
       <td>${d.entitlement_type?.value||'—'}</td>
@@ -764,6 +1176,8 @@ function renderEnts(recs) {
       <td class="trunc" title="${d.physical_access?.value||''}">${d.physical_access?.value||'—'}</td>
       <td class="trunc" title="${d.location?.value||''}">${d.location?.value||'—'}</td>
       <td><span class="badge ${isBes?'b-yes':'b-no'}">${bv}</span></td>
+      <td class="trunc" style="font-size:10px">${cipStd?`<span class="badge b-cip">${cipStd}</span>`:'—'}</td>
+      <td class="trunc" style="font-size:10px;color:var(--muted)">${scope||'—'}</td>
       <td class="trunc" style="font-size:11px" title="${d.provisioning_owner?.value||''}">${sName(d.provisioning_owner?.value)}</td>
       <td class="trunc" style="font-size:11px" title="${d.approval_owner?.value||''}">${sName(d.approval_owner?.value)}</td>
       <td><div class="ra">
@@ -781,10 +1195,15 @@ function openNewEnt() {
   editEId=null;
   set('modET','New Entitlement'); set('modES','Role: '+(selRole.data?.role_id||''));
   document.getElementById('ef_jp').value=selRole.data?.role_id||'';
-  ['ef_tp','ef_bes','ef_item','ef_pa','ef_loc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('ef_notes').value='';
+  ['ef_tp','ef_bes','ef_item','ef_pa','ef_loc','ef_scope','ef_cats','ef_risk','ef_rfcreq'].forEach(id=>document.getElementById(id).value='');
+  ['ef_notes','ef_cip'].forEach(id=>document.getElementById(id).value='');
+  ['ef_effdt','ef_expdt','ef_appdt'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ef_pot').value=''; document.getElementById('ef_poi').value='';
   document.getElementById('ef_aot').value=''; document.getElementById('ef_aoi').value='';
+  document.getElementById('ef_apbt').value=''; document.getElementById('ef_apbi').value='';
+  // Pre-fill CIP std from role if available
+  const roleCip = selRole.data?.nerc_cip_standard || '';
+  document.getElementById('ef_cip').value = roleCip;
   show('modE');
 }
 
@@ -805,6 +1224,18 @@ function openEditEnt(id) {
   document.getElementById('ef_poi').value=d.provisioning_owner?.id   ||'';
   document.getElementById('ef_aot').value=d.approval_owner?.value    ||'';
   document.getElementById('ef_aoi').value=d.approval_owner?.id       ||'';
+  // Compliance fields
+  document.getElementById('ef_cip').value=d.entitlement_cip_standard||'';
+  document.getElementById('ef_scope').value=d.entitlement_system_scope||'';
+  document.getElementById('ef_cats').value=d.requires_cats_web_ticket?.value?(d.requires_cats_web_ticket.value.toLowerCase()):'';
+  document.getElementById('ef_risk').value=d.entitlement_risk_level||'';
+  document.getElementById('ef_rfcreq').value=d.entitlement_rfc_required?.value?(d.entitlement_rfc_required.value.toLowerCase()):'';
+  document.getElementById('ef_effdt').value=d.entitlement_effective_date?d.entitlement_effective_date.slice(0,10):'';
+  document.getElementById('ef_expdt').value=d.entitlement_expiry_date?d.entitlement_expiry_date.slice(0,10):'';
+  // Design-time approval
+  document.getElementById('ef_apbt').value=d.entitlement_approved_by?.value||'';
+  document.getElementById('ef_apbi').value=d.entitlement_approved_by?.id   ||'';
+  document.getElementById('ef_appdt').value=d.entitlement_approval_date?new Date(d.entitlement_approval_date).toISOString().slice(0,16):'';
   show('modE');
 }
 
@@ -818,15 +1249,14 @@ async function cloneEnt(id) {
 
 async function saveEnt() {
   const isNew = !editEId;
-  
-  const jp   =document.getElementById('ef_jp').value.trim();
-  const notes=document.getElementById('ef_notes').value.trim();
-  const besVal=document.getElementById('ef_bes').value;   // "yes" or "no"
-  
-  const tpId =document.getElementById('ef_tp').value;
-  const poId =document.getElementById('ef_poi').value;
-  const aoId =document.getElementById('ef_aoi').value;
-  
+
+  const jp    = document.getElementById('ef_jp').value.trim();
+  const notes = document.getElementById('ef_notes').value.trim();
+  const besVal= document.getElementById('ef_bes').value;
+  const tpId  = document.getElementById('ef_tp').value;
+  const poId  = document.getElementById('ef_poi').value;
+  const aoId  = document.getElementById('ef_aoi').value;
+
   if(!jp)    { toast('Job Profile ID is required','e'); return; }
   if(!notes) { toast('Entitlement Justification is required','e'); return; }
   if(!besVal){ toast('BES Entitlement is required','e'); return; }
@@ -835,38 +1265,164 @@ async function saveEnt() {
   if(!aoId)  { toast('Approval Owner required — select from dropdown','e'); return; }
   if(!CFG.yesId || !CFG.noId){ toast('Yes/No IDs not loaded — refresh page','e'); return; }
 
-  const itemId=document.getElementById('ef_item').value;
-  const paId  =document.getElementById('ef_pa').value;
-  const locId =document.getElementById('ef_loc').value;
+  const itemId = document.getElementById('ef_item').value;
+  const paId   = document.getElementById('ef_pa').value;
+  const locId  = document.getElementById('ef_loc').value;
 
-  const payload={ data:{
+  // Compliance fields
+  const cipStd  = document.getElementById('ef_cip').value.trim();
+  const scopeV  = document.getElementById('ef_scope').value;
+  const catsV   = document.getElementById('ef_cats').value;
+  const riskV   = document.getElementById('ef_risk').value;
+  const rfcreqV = document.getElementById('ef_rfcreq').value;
+  const effdt   = document.getElementById('ef_effdt').value;
+  const expdt   = document.getElementById('ef_expdt').value;
+
+  // Design-time approval
+  const apbId   = document.getElementById('ef_apbi').value;
+  const appdtV  = document.getElementById('ef_appdt').value;
+
+  // Snapshot old data for audit diff
+  const oldRec = editEId ? ((document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(editEId))) : null;
+  const oldData = oldRec?.data || {};
+
+  const payload = { data: {
     workday_job_profile_id: jp,
     notes,
     entitlement_type:   isNew ? parseInt(tpId)  : { id: parseInt(tpId) },
     entitlement_is_bes: isNew ? ynId(besVal)    : { id: ynId(besVal) },
     provisioning_owner: isNew ? parseInt(poId)  : { id: parseInt(poId) },
     approval_owner:     isNew ? parseInt(aoId)  : { id: parseInt(aoId) },
-  ...(itemId ? { entitlement_item: isNew ? parseInt(itemId) : { id: parseInt(itemId) } } : {}),
-  ...(paId   ? { physical_access:  isNew ? parseInt(paId)  : { id: parseInt(paId)  } } : {}),
-  ...(locId  ? { location:         isNew ? parseInt(locId) : { id: parseInt(locId) } } : {}),
+    ...(itemId ? { entitlement_item: isNew ? parseInt(itemId) : { id: parseInt(itemId) } } : {}),
   }};
 
+  // Optional lookup fields with null strategy
+  applyOptional(payload.data, 'physical_access', optionalLookup(paId,  isNew));
+  applyOptional(payload.data, 'location',        optionalLookup(locId, isNew));
+
+  // ── POC FIELD GATES ────────────────────────────────────────────────────────
+  // Set a flag to true once the corresponding field is created in the
+  // Freshservice custom object builder. Until then the field is collected
+  // in the UI but never sent to the API, preventing 400 errors.
+  const FS_FIELDS = {
+    entitlement_cip_standard:    true,   // Text   — create first, then enable
+    entitlement_system_scope:    false,  // Lookup → System Scope master
+    entitlement_risk_level:      false,  // Lookup → Risk Level master
+    entitlement_effective_date:  false,  // Date
+    entitlement_expiry_date:     false,  // Date
+    entitlement_approval_date:   false,  // Date-Time
+    requires_cats_web_ticket:    false,  // Lookup → Yes/No
+    entitlement_rfc_required:    false,  // Lookup → Yes/No
+    entitlement_approved_by:     false,  // Lookup → All Agents
+  };
+
+  if (FS_FIELDS.entitlement_cip_standard   && cipStd)  payload.data.entitlement_cip_standard  = cipStd;
+  if (FS_FIELDS.entitlement_system_scope   && scopeV)  payload.data.entitlement_system_scope  = scopeV;
+  if (FS_FIELDS.entitlement_risk_level     && riskV)   payload.data.entitlement_risk_level    = riskV;
+  if (FS_FIELDS.entitlement_effective_date && effdt)   payload.data.entitlement_effective_date = effdt;
+  if (FS_FIELDS.entitlement_expiry_date    && expdt)   payload.data.entitlement_expiry_date   = expdt;
+  if (FS_FIELDS.entitlement_approval_date  && appdtV)  payload.data.entitlement_approval_date = new Date(appdtV).toISOString();
+  if (FS_FIELDS.requires_cats_web_ticket)  applyYesNoOpt(payload.data, 'requires_cats_web_ticket', catsV, isNew);
+  if (FS_FIELDS.entitlement_rfc_required)  applyYesNoOpt(payload.data, 'entitlement_rfc_required', rfcreqV, isNew);
+  if (FS_FIELDS.entitlement_approved_by && apbId) {
+    payload.data.entitlement_approved_by = isNew ? parseInt(apbId) : { id: parseInt(apbId) };
+  }
+  // ───────────────────────────────────────────────────────────────────────────
+
+  console.log('[saveEnt] nullStrategy='+getNullStrategy()+' paId='+paId+' locId='+locId);
   console.log('[saveEnt] payload:', JSON.stringify(payload));
+
   busy('btnES',true);
-  try{
-    if(editEId){ await PUT(`/api/v2/objects/${CFG.entObj}/records/${editEId}`,payload); toast('Entitlement updated','s'); }
-    else       { await POST(`/api/v2/objects/${CFG.entObj}/records`,payload);           toast('Entitlement created','s'); }
-    closeM('modE'); await loadEnts(selRole.data.role_id);
+  try {
+    if(editEId){
+      await PUT(`/api/v2/objects/${CFG.entObj}/records/${editEId}`, payload);
+      toast('Entitlement updated','s');
+    } else {
+      await POST(`/api/v2/objects/${CFG.entObj}/records`, payload);
+      toast('Entitlement created','s');
+    }
+
+    // Fetch the full saved record so audit snapshot has resolved lookup values
+    // (API response to PUT/POST returns bare IDs, not {id, value} objects)
+    let savedData = payload.data; // fallback
+    try {
+      const enc = encodeURIComponent(`workday_job_profile_id : '${jp}'`);
+      const fresh = await GET(`/api/v2/objects/${CFG.entObj}/records?page_size=100&query=${enc}`);
+      const recs = fresh.records || [];
+      const matched = editEId
+        ? recs.find(r => String(r.data.bo_display_id) === String(editEId))
+        : recs.sort((a,b) => b.data.bo_display_id - a.data.bo_display_id)[0];
+      if (matched) savedData = matched.data;
+    } catch(e) { console.warn('[saveEnt] fresh fetch failed:', e.message); }
+
+    // ── Write audit records ──────────────────────────────────────────────────
+    if (CFG.auditObj) {
+      const isBesRole = (selRole?.data?.is_bes?.value || '').toLowerCase() === 'yes';
+      const roleId    = selRole?.data?.role_id || jp;
+      // Full JSON snapshots — captures every field regardless of what changed
+      const snapOld = Object.keys(oldData).length ? JSON.stringify(oldData, null, 0) : null;
+      const snapNew = JSON.stringify(savedData, null, 0);
+
+      if (isNew) {
+        await writeAudit(buildEntAudit(EVT.ENT_ADDED, savedData, roleId, isBesRole, {
+          previous_value: null,
+          new_value:      snapNew,
+        }));
+        await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
+          previous_value: null,
+          new_value:      snapNew,
+        }));
+      } else {
+        // Entitlement_Removed — snapshot of record BEFORE the change
+        await writeAudit(buildEntAudit(EVT.ENT_REMOVED, oldData, roleId, isBesRole, {
+          previous_value: snapOld,
+          new_value:      null,
+        }));
+        // Entitlement_Added — snapshot of record AFTER the change
+        await writeAudit(buildEntAudit(EVT.ENT_ADDED, savedData, roleId, isBesRole, {
+          previous_value: snapOld,
+          new_value:      snapNew,
+        }));
+        await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
+          previous_value: snapOld,
+          new_value:      snapNew,
+        }));
+      }
+    }
+
+    closeM('modE');
+    await loadEnts(selRole.data.role_id);
   } catch(e){ toast('Save failed: '+e.message,'e'); console.error('[saveEnt] error:', e.message); }
   finally{ busy('btnES',false); }
 }
 
 function confirmDelEnt(id) {
-  confirm_('Delete Entitlement?','Permanently removes this entitlement. Cannot be undone.',
+  const rec=(document.getElementById('etb')._r||[]).find(r=>String(r.data.bo_display_id)===String(id));
+  const desc = rec ? describeEnt(rec.data||{}) : id;
+  confirm_('Delete Entitlement?',`Permanently removes this entitlement. Cannot be undone.<br><em style="font-size:11px;color:var(--muted)">${desc}</em>`,
     async()=>{
       try{
+        // Capture data before delete for audit
+        const oldData = rec?.data || {};
+        const isBesRole = (selRole?.data?.is_bes?.value || '').toLowerCase() === 'yes';
+        const roleId = selRole?.data?.role_id || '';
+
         await DEL(`/api/v2/objects/${CFG.entObj}/records/${id}`);
         toast('Deleted','s');
+
+        // Write Entitlement_Removed audit record
+        if (CFG.auditObj) {
+          const snapOld = JSON.stringify(oldData, null, 0);
+          await writeAudit(buildEntAudit(EVT.ENT_REMOVED, oldData, roleId, isBesRole, {
+            previous_value: snapOld,
+            new_value:      null,
+          }));
+          await writeAudit(buildRoleAudit(EVT.ROLE_DEF_CHANGED, selRole?.data || {}, {
+            previous_value: snapOld,
+            new_value:      null,
+          }));
+        }
+
         await loadEnts(selRole.data.role_id);
       } catch(e){ toast('Delete failed: '+e.message,'e'); }
     });
@@ -883,6 +1439,9 @@ function buildEP(d) {
     ...(d.entitlement_item?.id    ? { entitlement_item:   { id: d.entitlement_item.id   } } : {}),
     ...(d.physical_access?.id     ? { physical_access:    { id: d.physical_access.id    } } : {}),
     ...(d.location?.id            ? { location:           { id: d.location.id           } } : {}),
+    ...(d.entitlement_cip_standard? { entitlement_cip_standard: d.entitlement_cip_standard } : {}),
+    ...(d.entitlement_system_scope? { entitlement_system_scope: d.entitlement_system_scope } : {}),
+    ...(d.entitlement_risk_level  ? { entitlement_risk_level:   d.entitlement_risk_level   } : {}),
   }};
 }
 
@@ -901,7 +1460,7 @@ function pickU(tId,hId,dId,id,name,email){
   document.getElementById(tId).value=`${name} <${email}>`; document.getElementById(hId).value=id; document.getElementById(dId).style.display='none';
 }
 document.addEventListener('click',e=>{
-  ['ef_pod','ef_aod'].forEach(id=>{ const dd=document.getElementById(id); if(dd&&!dd.contains(e.target)&&e.target.id!=='ef_pot'&&e.target.id!=='ef_aot') dd.style.display='none'; });
+  ['ef_pod','ef_aod','ef_apbd'].forEach(id=>{ const dd=document.getElementById(id); if(dd&&!dd.contains(e.target)) dd.style.display='none'; });
 });
 
 // ═══════════════════════════════════════════
@@ -938,6 +1497,7 @@ if(typeof app !== 'undefined' && typeof app.initialized === 'function'){
 } else {
   init();
 }
+
 function toggleTheme() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   const next = isLight ? 'dark' : 'light';
@@ -945,17 +1505,16 @@ function toggleTheme() {
   document.getElementById('themeBtn').textContent = next === 'light' ? '☾' : '☀';
   localStorage.setItem('velco-theme', next);
 }
-// Apply saved preference on load
 (function() {
   const saved = localStorage.getItem('velco-theme');
   if (saved === 'light') {
     document.documentElement.setAttribute('data-theme', 'light');
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('themeBtn').textContent = '☾';
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = '☾';
     });
   }
 })();
-
 </script>
 </body>
 </html>
