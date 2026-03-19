@@ -126,6 +126,9 @@ header h1{font-size:14px;font-weight:500}
 .req{color:var(--red);margin-left:2px}
 .sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding-bottom:5px;border-bottom:1px solid var(--brd);grid-column:1/-1;margin-top:4px}
 
+/* ── Sequence badge on SG ID field ── */
+.seq-badge{font-family:var(--mono);font-size:10px;color:var(--acc2);opacity:.8;margin-top:2px}
+
 /* ── Empty ── */
 .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dim);gap:10px;padding:48px}
 .empty-state .ico{font-size:36px;opacity:.4}
@@ -204,7 +207,8 @@ header h1{font-size:14px;font-weight:500}
         <div class="sec">Identity</div>
         <div class="ff">
           <label>Security Group ID <span class="req">*</span></label>
-          <input type="text" id="sg-f-id" placeholder="e.g. SG1200"/>
+          <input type="text" id="sg-f-id" placeholder="Generating…"/>
+          <span class="seq-badge" id="seq-badge" style="display:none"></span>
         </div>
         <div class="ff">
           <label>Security Group Name <span class="req">*</span></label>
@@ -250,6 +254,11 @@ const CFG = {
   sgPalObj:  37000019280,  // SG_PAL_Assignment  junction
   sgL2Obj:   37000019281,  // SG_L2_Assignment   junction
   auditObj:  37000019275,  // Compliance Audit Trail
+  seqObj:    37000019284,  // System Sequences (SG auto-numbering)
+  // API field names for the sequence object record.
+  // If FS uses a different prefix than 'cj_', adjust these two strings.
+  seqPrefix: 'security_group_sequence_prefix',
+  seqLast:   'security_group_sequence_last_value',
 };
 
 // Event Type Master record IDs
@@ -296,6 +305,63 @@ async function fetchAll(objId) {
     page++;
   }
   return all;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SEQUENCE
+//  Reads the single System Sequences record, computes the next SG ID,
+//  and (after successful SG creation) writes the incremented value back.
+// ═══════════════════════════════════════════════════════════════════
+
+// Cached sequence record — holds internal FS record id + current last value
+let _seqRec = null;  // { id: <FS internal record id>, prefix: 'SG', lastValue: 5000 }
+
+/**
+ * fetchSeqRecord()
+ * Loads the first (and only) record from the System Sequences object.
+ * Caches it in _seqRec for use during saveSG().
+ * Returns the computed next SG ID string (e.g. "SG5001").
+ */
+async function fetchSeqRecord() {
+  const d = await GET(`/api/v2/objects/${CFG.seqObj}/records?page_size=1&page=1`);
+  const rec = (d.records || [])[0];
+  if (!rec) throw new Error('System Sequences record not found in object ' + CFG.seqObj);
+
+  const raw = rec.data;
+  const prefix    = raw[CFG.seqPrefix]    ?? raw['security_group_sequence_prefix']    ?? 'SG';
+  const lastValue = raw[CFG.seqLast]      ?? raw['security_group_sequence_last_value'] ?? 0;
+
+  // Log raw field names once so we can confirm/fix prefix if needed
+  console.log('[Seq] raw data keys:', Object.keys(raw));
+  console.log('[Seq] prefix:', prefix, '| lastValue:', lastValue, '| FS record id:', rec.id);
+
+  _seqRec = {
+    id:        raw.bo_display_id, // bo_display_id from data (rec.id is undefined in this API)
+    prefix:    String(prefix),
+    lastValue: parseInt(lastValue, 10),
+  };
+
+  return _seqRec.prefix + (_seqRec.lastValue + 1);
+}
+
+/**
+ * commitSeqIncrement()
+ * PUTs the incremented last_value back to the sequence record.
+ * Called only after a successful SG POST.
+ * Uses { id: N } object wrapper required by FS PUT for number fields —
+ * but since last_value is a plain Number field (not a lookup), we send the bare integer.
+ */
+async function commitSeqIncrement() {
+  if (!_seqRec) throw new Error('Sequence record not loaded — cannot commit increment.');
+  const newLast = _seqRec.lastValue + 1;
+  await PUT(`/api/v2/objects/${CFG.seqObj}/records/${_seqRec.id}`, {
+    data: {
+      [CFG.seqLast]: String(newLast),
+    },
+  });
+  console.log('[Seq] committed new last value:', newLast);
+  // Update cache so a second create in the same session without a full reload still works
+  _seqRec.lastValue = newLast;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -724,80 +790,138 @@ async function saveTree(sgId) {
 // ═══════════════════════════════════════════════════════════════════
 //  SG CRUD
 // ═══════════════════════════════════════════════════════════════════
-function openNewSG() {
-  editSGId=null;
-  document.getElementById('mod-sg-t').textContent='New Security Group';
-  document.getElementById('sg-f-id').value='';
-  document.getElementById('sg-f-name').value='';
-  document.getElementById('sg-f-notes').value='';
-  document.getElementById('sg-f-id').removeAttribute('readonly');
-  document.getElementById('mod-sg').style.display='flex';
+
+/**
+ * openNewSG()
+ * Opens the New SG modal and pre-populates the SG ID field with the
+ * next sequence value fetched from the System Sequences object.
+ * The field is rendered read-only so the user cannot override it.
+ */
+async function openNewSG() {
+  editSGId = null;
+  document.getElementById('mod-sg-t').textContent = 'New Security Group';
+  document.getElementById('sg-f-name').value  = '';
+  document.getElementById('sg-f-notes').value = '';
+
+  // Show modal immediately with a loading placeholder
+  const idField   = document.getElementById('sg-f-id');
+  const seqBadge  = document.getElementById('seq-badge');
+  const saveBtn   = document.getElementById('btn-sg-save');
+
+  idField.value = 'Generating…';
+  idField.setAttribute('readonly', 'readonly');
+  seqBadge.style.display = 'none';
+  saveBtn.disabled = true;
+  document.getElementById('mod-sg').style.display = 'flex';
+
+  try {
+    const nextId = await fetchSeqRecord();
+    idField.value = nextId;
+    seqBadge.textContent = `Auto-generated · sequence ${_seqRec.lastValue + 1}`;
+    seqBadge.style.display = 'block';
+    saveBtn.disabled = false;
+    console.log('[openNewSG] next SG ID:', nextId);
+  } catch(e) {
+    idField.value = '';
+    idField.removeAttribute('readonly');
+    seqBadge.textContent = '⚠ Could not load sequence — enter ID manually.';
+    seqBadge.style.display = 'block';
+    seqBadge.style.color = 'var(--ylw)';
+    saveBtn.disabled = false;
+    toast('Sequence load failed: ' + e.message, 'e');
+    console.error('[openNewSG] seq fetch error:', e);
+  }
 }
 
 function openEditSG(recId) {
   const sg = sgRecs.find(s=>s.data.bo_display_id===recId);
   if(!sg) return;
   const d = sg.data;
-  editSGId=recId;
-  document.getElementById('mod-sg-t').textContent='Edit Security Group';
-  document.getElementById('sg-f-id').value   = d.security_group_id||'';
-  document.getElementById('sg-f-name').value = d.security_group_name||'';
-  document.getElementById('sg-f-notes').value= d.security_group_description||'';
-  document.getElementById('sg-f-id').setAttribute('readonly','readonly');
-  document.getElementById('mod-sg').style.display='flex';
+  editSGId = recId;
+
+  const seqBadge = document.getElementById('seq-badge');
+  seqBadge.style.display = 'none';
+
+  document.getElementById('mod-sg-t').textContent = 'Edit Security Group';
+  document.getElementById('sg-f-id').value    = d.security_group_id || '';
+  document.getElementById('sg-f-name').value  = d.security_group_name || '';
+  document.getElementById('sg-f-notes').value = d.security_group_description || '';
+  document.getElementById('sg-f-id').setAttribute('readonly', 'readonly');
+  document.getElementById('btn-sg-save').disabled = false;
+  document.getElementById('mod-sg').style.display = 'flex';
 }
 
+/**
+ * saveSG()
+ * On create: POSTs the new SG, then commits the sequence increment.
+ * Sequence is committed AFTER successful SG creation to avoid
+ * burning a sequence number on a failed save.
+ */
 async function saveSG() {
-  const isNew    = editSGId===null;
-  const sgIdVal  = document.getElementById('sg-f-id').value.trim();
-  const sgName   = document.getElementById('sg-f-name').value.trim();
-  const sgNotes  = document.getElementById('sg-f-notes').value.trim();
+  const isNew   = editSGId === null;
+  const sgIdVal = document.getElementById('sg-f-id').value.trim();
+  const sgName  = document.getElementById('sg-f-name').value.trim();
+  const sgNotes = document.getElementById('sg-f-notes').value.trim();
 
-  if(!sgIdVal) { toast('Security Group ID is required.','e'); return; }
-  if(!sgName)  { toast('Security Group Name is required.','e'); return; }
+  if(!sgIdVal) { toast('Security Group ID is required.', 'e'); return; }
+  if(!sgName)  { toast('Security Group Name is required.', 'e'); return; }
 
   const btn = document.getElementById('btn-sg-save');
-  btn.disabled=true; btn.innerHTML='<span class="spn"></span> Saving…';
+  btn.disabled = true; btn.innerHTML = '<span class="spn"></span> Saving…';
 
   const data = {
-    security_group_id:          sgIdVal,
-    security_group_name:        sgName,
+    security_group_id:   sgIdVal,
+    security_group_name: sgName,
     ...(sgNotes ? { security_group_description: sgNotes } : {}),
   };
 
-  // Wrap lookups correctly for PUT
-  const payload = isNew ? { data } : { data: {
-    security_group_id:          sgIdVal,
-    security_group_name:        sgName,
-    ...(sgNotes ? { security_group_description: sgNotes } : {}),
-  }};
+  const payload = { data };
 
   try {
     let newRecId = editSGId;
     const snapOld = !isNew ? JSON.stringify(sgRecs.find(s=>s.data.bo_display_id===editSGId)?.data||{}) : null;
+
     if(isNew) {
+      // 1. Create the Security Group record
       const res = await POST(`/api/v2/objects/${CFG.sgObj}/records`, payload);
       newRecId  = res?.data?.bo_display_id;
+
+      // 2. Commit the sequence increment (only after successful POST)
+      if(_seqRec) {
+        try {
+          await commitSeqIncrement();
+        } catch(seqErr) {
+          // SG was created successfully; sequence commit failed.
+          // Log prominently but don't block the user — the SG exists.
+          console.error('[saveSG] SG created but sequence commit failed:', seqErr.message);
+          toast('SG created, but sequence counter update failed — check console.', 'e');
+        }
+      }
+
       await writeAudit(buildAudit(EVT.SG_CREATED, { security_group_id: sgIdVal }, {
-        new_value: JSON.stringify(res?.data||data),
+        new_value: JSON.stringify(res?.data || data),
       }));
-      toast('Security Group created.','s');
+      toast('Security Group created.', 's');
+
     } else {
+      // Edit path — sequence is not touched
       await PUT(`/api/v2/objects/${CFG.sgObj}/records/${editSGId}`, payload);
       await writeAudit(buildAudit(EVT.SG_UPDATED, { security_group_id: sgIdVal }, {
         previous_value: snapOld,
         new_value:      JSON.stringify(data),
       }));
-      toast('Security Group updated.','s');
+      toast('Security Group updated.', 's');
     }
+
     closeM('mod-sg');
     await init();
     if(newRecId) selectSG(newRecId);
+
   } catch(e) {
-    toast('Save failed: '+e.message,'e');
-    console.error('[saveSG]',e);
+    toast('Save failed: ' + e.message, 'e');
+    console.error('[saveSG]', e);
   } finally {
-    btn.disabled=false; btn.innerHTML='Save';
+    btn.disabled = false; btn.innerHTML = 'Save';
   }
 }
 
@@ -838,7 +962,6 @@ function confirmDeleteSG(recId) {
 function lid(f){
   if(f==null) return null;
   if(typeof f==='object'){
-    // FS returns {"id":{}} for empty lookup fields — treat as null
     if(f.id==null || typeof f.id==='object') return null;
     const n=parseInt(f.id); return isNaN(n)?null:n;
   }
