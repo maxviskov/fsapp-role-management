@@ -18,6 +18,14 @@
   --r:6px;--t:150ms ease;
   --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
 }
+[data-theme="light"]{
+  --bg:#f0f2f7;--sur:#ffffff;--sur2:#e8ebf2;--sur3:#d8dce8;
+  --brd:#d0d6e8;--brd2:#b0bad8;
+  --txt:#1a2035;--muted:#6272a4;--dim:#8892b0;
+  --acc:#2563eb;--acc2:#059669;
+  --red:#dc2626;--red-bg:rgba(220,38,38,.1);--red-brd:rgba(220,38,38,.3);
+  --ylw:#d97706;
+}
 html,body{height:100%}
 body{font-family:var(--sans);background:var(--bg);color:var(--txt);font-size:13px;display:flex;flex-direction:column;overflow:hidden}
 
@@ -165,6 +173,7 @@ header h1{font-size:14px;font-weight:500}
   <span class="logo">VELCO</span>
   <h1>Security Group Manager</h1>
   <div class="sp1"></div>
+  <button class="btn bs" id="themeBtn" onclick="toggleTheme()" style="padding:5px 9px;font-size:13px">☀</button>
   <span id="api-st">Connecting…</span>
   <button class="btn bs bsm" onclick="init()">↺ Refresh</button>
   <span class="env">DEV / BETA</span>
@@ -991,6 +1000,27 @@ function toast(msg,type='i'){
 document.querySelectorAll('.ov').forEach(el=>
   el.addEventListener('click',e=>{ if(e.target===el)el.style.display='none'; })
 );
+
+// ═══════════════════════════════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════════════════════════════
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = next === 'light' ? '☾' : '☀';
+  localStorage.setItem('velco-sgm-theme', next);
+}
+(function() {
+  const saved = localStorage.getItem('velco-sgm-theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = '☾';
+    });
+  }
+})();
 
 init();
 </script>
